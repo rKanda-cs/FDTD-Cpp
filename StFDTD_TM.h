@@ -33,6 +33,13 @@ private:
 			for (int i = 1; i < mField->getNpx() - 1; i++)
 				for (int j = 1; j < mField->getNpy() - 1; j++)
 					EZY(i, j) = CEZY(i, j)*EZY(i, j) - CEZYLY(i, j)*(HX(i, j) - HX(i, j - 1));
+
+		#ifdef _OPENMP
+		#pragma omp for
+		#endif
+			for (int i = 1; i < mField->getNpx() - 1; i++)
+				for (int j = 1; j < mField->getNpy() - 1; j++)
+					EZ(i, j) = EZX(i, j) + EZY(i, j);
 		}
 	}
 

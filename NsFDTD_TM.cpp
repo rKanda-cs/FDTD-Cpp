@@ -18,7 +18,7 @@ NsFDTD_TM::~NsFDTD_TM(){
 
 bool NsFDTD_TM::calc(){
 	CalcE();	//“dê‚ÌŒvZ
-	//NsScatteredWave(wave_angle);	//U—”g‚Ì“üË
+	NsScatteredWave(wave_angle);	//U—”g‚Ì“üË
 	pointLightSource(Ez);
 	absorbing();					//‹zû‹«ŠE
 

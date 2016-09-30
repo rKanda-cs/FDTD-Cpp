@@ -295,7 +295,7 @@ void Solver::draw(complex<double> *p){
 		}
 	}
 
-	draw_model();
+	//draw_model();
 }
 
 //U—‘Ì‚Ì•`‰æ

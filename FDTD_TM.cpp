@@ -123,6 +123,7 @@ void FDTD_TM::NsScatteredWave(int ang){
 			double ikx = i*_cos + j*_sin;		//k_s*(i*cos + j*sin)
 			EZX(i,j) += 0.5*ray_coef*(1.0/(_n*n) - 1)*(polar(1.0, ikx - w_s*(time+DT_S)) - polar(1.0, ikx - w_s*time));
 			EZY(i,j) += 0.5*ray_coef*(1.0/(_n*n) - 1)*(polar(1.0, ikx - w_s*(time+DT_S)) - polar(1.0, ikx - w_s*time)); 
+			EZ(i, j) += ray_coef*(1.0/(_n*n) - 1)*(polar(1.0, ikx - w_s*(time+DT_S)) - polar(1.0, ikx - w_s*time));
 		}
 	}
 }
@@ -156,8 +157,8 @@ void FDTD_TM::IncidentWaveH(int ang){
 }
 
 void FDTD_TM::draw(){
-	super::draw(Ezx, Ezy);	
-//	super::draw(Ez);	
+	//super::draw(Ezx, Ezy);	
+	super::draw(Ez);	
 }
 
 bool FDTD_TM::calc(){

@@ -16,10 +16,11 @@ StFDTD_TE::~StFDTD_TE(){
 bool StFDTD_TE::calc(){
 	CalcE();
 	//pointLightSource(Ey);
-	//NsScatteredWave(wave_angle);
-	scatteredWave(Ey, EPS_EY);
+	NsScatteredWave(wave_angle);
+	//scatteredWave(Ey, EPS_EY);
 	//scatteredWave(Ey);
 
+	absorbing();
 	CalcH();
 
 	if(time > 7000){						//time•ÏX

@@ -43,8 +43,12 @@ bool StFDTD_TM::calc(){
 	CalcE();
 	//EZX(mField->getNpx()/2, mField->getNpy()/2) += 0.5*ray_coef*polar(1.0, w_s*time);
 	//EZY(mField->getNpx()/2, mField->getNpy()/2) += 0.5*ray_coef*polar(1.0, w_s*time);
-	//NsScatteredWave(wave_angle);
-	scatteredWave(Ezx, EPS_EZ);
+	NsScatteredWave(wave_angle);
+	//scatteredWave(Ezx, EPS_EZ);
+	//scatteredWave(Ezy, EPS_EZ);
+	//scatteredWave(Ez, EPS_EZ);
+
+	absorbing();
 	CalcH();
 	if(time > 4000){
 		MiePrint(Ez, "Mie_TM2");
