@@ -106,16 +106,23 @@ void Solver::linearLightSource(complex<double> *p){
 }
 
 //U—”g‚ÌŒvZ
-void Solver::scatteredWave(complex<double> *p){
+void Solver::scatteredWave(complex<double> *p, double *eps){
 	double rad = wave_angle*M_PI/180;	//ƒ‰ƒWƒAƒ“•ÏŠ·
 	double _cos = cos(rad), _sin = sin(rad);	//–ˆ‰ñŒvZ‚·‚é‚ÆŠÔ‚©‚©‚è‚»‚¤‚¾‚©‚ç,‘ã“ü‚µ‚Ä‚¨‚­
+	std::complex<double> MinusOne(-1, 0), I;
+	I = sqrt(MinusOne);
 
 	for(int i=mField->getNpml(); i<mField->getNpx(); i++){
 		for(int j=mField->getNpml(); j<mField->getNpy(); j++){
 			if( N_S(i,j) == 1.0 ) continue;		//‹üÜ—¦‚ª1‚È‚çU—‚Í‹N‚«‚È‚¢
 			double ikx = k_s*(i*_cos + j*_sin);
-			p[index(i,j, +1)] += ray_coef*(1/_pow(N_S(i,j), 2)-1)
-				                    *(polar(1.0, ikx-w_s*(time+DT_S))+polar(1.0, ikx-w_s*(time-DT_S))-2.0*polar(1.0, ikx-w_s*time)); 
+			//p[index(i,j, +1)] += ray_coef*(1/_pow(N_S(i,j), 2)-1)
+			//	                    *(polar(1.0, ikx-w_s*(time+DT_S))+polar(1.0, ikx-w_s*(time-DT_S))-2.0*polar(1.0, ikx-w_s*time)); 
+		
+			p[index(i, j)] += ray_coef*(EPSILON_0_S / eps[index(i, j)] - 1)*(
+				cos(ikx - w_s*(time + 0.5)) + I*sin(ikx - w_s*(time + 0.5))
+				- cos(ikx - w_s*(time - 0.5)) - I*sin(ikx - w_s*(time - 0.5))
+				);
 		}
 	}
 }
@@ -278,8 +285,8 @@ void Solver::draw(complex<double> *p){
 		for (int j = mField->getNpml(); j < mField->getNpy()-mField->getNpml(); j++){
 			int x = i-mField->getNpml();
 			int y = j-mField->getNpml();
-			//Color c = color( norm(p[index(i,j)]) );
-			Color c = color(30.0*p[index(i,j)].real());
+			Color c = color( norm(p[index(i,j)]) );
+			//Color c = color(30.0*p[index(i,j)].real());
 			glColor3d(c.red, c.green, c.blue);
 			if(j==mField->getNpy()/2 || i==mField->getNpx()/2) glColor3d(1,1,1);
 			

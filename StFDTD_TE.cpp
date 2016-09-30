@@ -14,10 +14,10 @@ StFDTD_TE::~StFDTD_TE(){
 }
 
 bool StFDTD_TE::calc(){
-	NsScatteredWave(wave_angle);
-
 	CalcE();
 	//pointLightSource(Ey);
+	//NsScatteredWave(wave_angle);
+	scatteredWave(Ey, EPS_EY);
 	//scatteredWave(Ey);
 
 	CalcH();

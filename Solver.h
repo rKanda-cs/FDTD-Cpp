@@ -106,7 +106,7 @@ protected:
 	//---------------------------------------------------------//
 	void linearLightSource(complex<double> *p);	//‰¡•ûŒü‚ÌüŒõŒ¹
 	void pointLightSource(complex<double> *p);	//’†S‚É“_ŒõŒ¹
-	void scatteredWave(complex<double> *p);
+	void scatteredWave(complex<double> *p, double *eps);
 
 	virtual void Initialize(){
 		time = 0;	//ŠÔ‚ğ0‚É
