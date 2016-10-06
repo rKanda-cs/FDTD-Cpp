@@ -7,7 +7,7 @@
 FazzyMieModel::FazzyMieModel(Field *f, double _r):
 FazzyModel(f),r(_r)
 {
-	ep = 1.6*1.6*EPSILON_0_S;
+	ep = 1.6*1.6*EPSILON_0_S;			//誘電率 = (屈折率)^2
 		cout << r << endl;
 }
 
@@ -23,7 +23,7 @@ double FazzyMieModel::calcEPS(const double& x, const double& y, enum INTEG f){
 
 	double mx = x - mField->getNpml(); //計算領域内へ写像
 	double my = y - mField->getNpml();
-	if(mx < 0 || my < 0 || mx >= mField->getNx() || my >= mField->getNy() ) return EPSILON_0_S;
+	if (mx < 0 || my < 0 || mx >= mField->getNx() || my >= mField->getNy()) return EPSILON_0_S;
 
 	double _x = mx - 0.5*mField->getNx();//(N_X/2, N_Y/2)を原点にシフト
 	double _y = my - 0.5*mField->getNy();

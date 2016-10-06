@@ -26,8 +26,8 @@ private:
 	#pragma omp parallel for
 	#endif
 		//“dŠE‚ÌŒvZ
-		for (int i = 1; i < mField->getNx() - 1; i++) {
-			for (int j = 1; j < mField->getNy() - 1; j++) {
+		for (int i = 1; i < mField->getNpx() - 1; i++) {
+			for (int j = 1; j < mField->getNpy() - 1; j++) {
 
 				EZ(i, j, +1) = CEZ(i, j)*EZ(i, j, 0)
 					+ CEZLH(i, j)*(R_P*(HY(i, j, 0) - HY(i - 1, j, 0) - (HX(i, j, 0) - HX(i, j - 1, 0)))	//dx(Hy) - dy(Hy)
@@ -36,6 +36,7 @@ private:
 			}
 		}
 	}
+
 
 	//‹zû‹«ŠE‚ÍEz‚É‚µ‚©“K—p‚µ‚È‚¢‚©‚ç,H‚Í—Ìˆæ‚Ì’[‚à•’Ê‚ÉŒvZ‚·‚é(‚Å‚«‚é•ª‚Í)
 	void CalcH(){	//todo ŒvZ—Ìˆæ i=0?, 1? j=0?, 1?
@@ -46,8 +47,8 @@ private:
 		#ifdef _OPENMP
 		#pragma omp for
 		#endif
-		for(int i=0; i<mField->getNx(); i++){
-			for(int j=0; j<mField->getNy()-1; j++){
+		for(int i=0; i<mField->getNpx(); i++){
+			for(int j=0; j<mField->getNpy()-1; j++){
 				HX(i,j, +1) = HX(i,j, 0) - CHXLY(i,j)*( EZ(i,j+1, +1) - EZ(i,j, +1) );	//Hx‚ÌŒvZ Hx(i, j+1/2) -> Hx[i,j]
 			}
 		}
@@ -55,8 +56,8 @@ private:
 		#ifdef _OPENMP
 		#pragma omp for
 		#endif
-		for(int i=0; i<mField->getNx()-1; i++){
-			for(int j=0; j<mField->getNy(); j++){
+		for(int i=0; i<mField->getNpx()-1; i++){
+			for(int j=0; j<mField->getNpy(); j++){
 				HY(i,j, +1) = HY(i,j, 0) + CHYLX(i,j)*( EZ(i+1,j, +1) - EZ(i,j, +1) );	//Hy‚ÌŒvZ Hy(i+1/2, j) -> Hy[i,j]
 			}
 		}

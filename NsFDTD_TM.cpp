@@ -48,11 +48,12 @@ bool NsFDTD_TM::EndTask(){
 //--------------計算係数の設定---------------------//
 void NsFDTD_TM::field(){		
 	super::field();										//誘電率の設定
+	setWorkingDirPass(MakeDir("Ns"));
 	setWorkingDirPass(mModel->mkdir(getDataDirPass()));	//データを保存するディレクトリの設定
 	R_M = NsCoef();		//差分演算用の計算定数の設定
 	R_P = 1.0-R_M;
-	for(int i=0; i<mField->getNx(); i++){
-		for(int j=0; j<mField->getNy(); j++){
+	for(int i=0; i<mField->getNpx(); i++){
+		for(int j=0; j<mField->getNpy(); j++){
 			double mu = MU_0_S;
 			
 			double u_ez = sin(w_s/sqrt(EPSEZ(i,j)/EPSILON_0_S)*DT_S/2)/ sin(k_s*DT_S/2);

@@ -15,7 +15,7 @@ bool NsFDTD_TE::calc(){
 
 	CalcE();	//電界の計算
 
-	//NsScatteredWave(wave_angle);
+	NsScatteredWave(wave_angle);
 	absorbing();
 
 	CalcH();		//磁界の計算 Hz(i+1/2, j+1/2) -> Hz[i,j]
@@ -46,6 +46,7 @@ bool NsFDTD_TE::EndTask(){
 
 void NsFDTD_TE::field(){		
 	super::field();	//誘電率の設定
+	setWorkingDirPass(MakeDir("Ns"));
 	setWorkingDirPass(mModel->mkdir(getDataDirPass()));	//データを保存するディレクトリの設定
 
 	R_M = NsCoef();		//差分演算用の計算定数の設定

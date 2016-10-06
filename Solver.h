@@ -110,7 +110,7 @@ protected:
 
 	virtual void Initialize(){
 		time = 0;	//ŽžŠÔ‚ð0‚É
-		DataDir		=  "../../../DataSet/";
+		DataDir		=  "../DataSet/";
 	}
 
 	void SetWaveParameter(double lam){
@@ -263,7 +263,7 @@ protected:
 	}
 
 	string MakeDir(string name){
-		_mkdir((DataDir + name).c_str());
+		if(_mkdir((DataDir + name).c_str()) == 0) cout << "makeNEWdir" <<endl;
 		return name + "/"; 
 	}
 

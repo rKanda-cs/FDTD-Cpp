@@ -21,6 +21,7 @@ N_CELL( (width/h_u + 2*pml) * (height/h_u + 2*pml))
 };
 
 
+//B-PML‚É‚¨‚¯‚é“±“d—¦ƒÐ
 double Field::sigmaX(const int &i, const int &j){
 	//ƒ¢x = h = 1
 	if(i<N_PML) 

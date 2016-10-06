@@ -20,7 +20,7 @@ bool StFDTD_TE::calc(){
 	//scatteredWave(Ey, EPS_EY);
 	//scatteredWave(Ey);
 
-	absorbing();
+	//absorbing();
 	CalcH();
 
 	if(time > 7000){						//timeïœçX
@@ -33,6 +33,7 @@ bool StFDTD_TE::calc(){
 
 void StFDTD_TE::field(){
 	super::field();
+	setWorkingDirPass(MakeDir("St"));
 
 	double sig_x, sig_xx, sig_y, sig_yy; 	//É–x, É–x*, É–y, É–y*
 	for(int i=0; i<mField->getNpx();i++){

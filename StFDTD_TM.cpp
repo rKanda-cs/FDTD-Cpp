@@ -15,7 +15,9 @@ StFDTD_TM::~StFDTD_TM(){
 
 void StFDTD_TM::field(){
 	super::field();
-	double sig_x, sig_y, sig_xx, sig_yy;//É–x, É–x*, É–y, É–y*
+	setWorkingDirPass(MakeDir("St"));
+
+	double sig_x, sig_y, sig_xx, sig_yy;//É–x, É–x*, É–y, É–y* Å@Å@<- B-PMLÇÃåWêî
 	for(int i=0; i<mField->getNpx(); i++){
 		for(int j=0; j<mField->getNpy(); j++){
 			sig_x = mField->sigmaX(i,j);
@@ -48,13 +50,9 @@ bool StFDTD_TM::calc(){
 	//scatteredWave(Ezy, EPS_EZ);
 	//scatteredWave(Ez, EPS_EZ);
 
-	absorbing();
+	//absorbing();
 	CalcH();
-	if(time > 4000){
-		MiePrint(Ez, "Mie_TM2");
-		return false;
-	}
-	
+
 	/*
 	if(file){
 		file << Ez[index(9*mField->getNx()/10, mField->getNy()/2, +1)] << endl;
@@ -64,8 +62,12 @@ bool StFDTD_TM::calc(){
 	}
 	*/
 
-	if(time > 7000) return false;
-	
+	if (time > 7000) {
+		MiePrint(Ez, "time7000_TM_");
+//		string label = "";
+//		NTFFindexform("", NTFF::NTFFDATA | NTFF::TOTAL);
+		return false;
+	}
 	return true;
 }
 

@@ -17,7 +17,7 @@ Solver::Solver()
 	:H_S(1.0), DT_S(1.0)
 {
 	mField = new Field(2000, 2000, 10, 20); //width, height, ƒ¢h, Npml
-	LambdaRange    = Range<double>(Nano_S(380), Nano_S(700), Nano_S(5));
+	LambdaRange    = Range<double>(Nano_S(600), Nano_S(700), Nano_S(5));	//380->600
 	WaveAngleRange = Range<int>   (0, 0, 10);
 
 	SetWaveParameter( LambdaRange.MIN() );
@@ -31,7 +31,7 @@ Solver::Solver()
 	mModel	 = new FazzyMieModel(mField, lambda_s);
 	//mModel	 = new FazzyMorphoModel(mField, 150, 55, NONSHELF);
 	//mModel	 = new FazzyNoModel(mField);
-	DataDir		=  "../../../DataSet/";
+	DataDir		=  "../DataSet/";
 	WorkingDir  =  "";
 
 	cout << "Solver Constructor" << endl;
@@ -224,13 +224,13 @@ void Solver::absorbing_nsTB(complex<double> *p, int Y, enum DIRECT offset){
 		u2 = 2 * _pow(sin(w_b/n_s[index(i,Y)]), 2) / _pow(sin(ky_b),2) * (1 - tan(kx_b)/tan(k_b));
 
 		if(i==1 || i==mField->getNx()-2)	//Žl‹÷‚Ì‰¡‚ÍˆêŽŸŒ³‹zŽû‹«ŠE
-			p[index(i,Y, +1)]    = p[index(i,Y+offset, 0)]    + (1- u1)/(1+u1)*(p[index(i,Y, 0)] - p[index(i,Y+offset, +1)]);
+			p[index(i,Y, +1)] = p[index(i,Y+offset, 0)] + (1- u1)/(1+u1)*(p[index(i,Y, 0)] - p[index(i,Y+offset, +1)]);
 
 		else				//“ñŽŸŒ³‹zŽû‹«ŠE
-			p[index(i,Y, +1)]  = -p[index(i,Y+offset, -1)]    
-								  - (1-u1)/(1+u1)*(p[index(i,Y, -1)] + p[index(i,Y+offset, +1)]) 
-							      +     2/(1+u1)*(p[index(i,Y, 0)]  + p[index(i,Y+offset, 0)])     
-								  + u2*u2/(1+u1)/2*( Dx2(p, i,Y, 0)   + Dx2(p, i,Y+offset, 0) 	);
+			p[index(i,Y, +1)] = - p[index(i,Y+offset, -1)]    
+								- (1-u1)/(1+u1)*(p[index(i,Y, -1)] + p[index(i,Y+offset, +1)]) 
+							    +     2/(1+u1)*(p[index(i,Y, 0)]  + p[index(i,Y+offset, 0)])     
+								+ u2*u2/(1+u1)/2*( Dx2(p, i,Y, 0)   + Dx2(p, i,Y+offset, 0) 	);
 												  //  dx^2 ƒÓn     +   dx^2 ƒÓb
 	}		
 }
