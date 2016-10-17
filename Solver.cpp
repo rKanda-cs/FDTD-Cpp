@@ -10,21 +10,22 @@
 #include <fstream>
 #include <iostream>
 
+
 #define new ::new(_NORMAL_BLOCK, __FILE__, __LINE__)
 #define _USE_MATH_DEFINES
 
 Solver::Solver()
 	:H_S(1.0), DT_S(1.0)
 {
-	mField = new Field(2000, 2000, 10, 20); //width, height, Δh, Npml
-	LambdaRange    = Range<double>(Nano_S(600), Nano_S(700), Nano_S(5));	//380->600
+	mField = new Field(200, 200, 1, 5); //width, height, Δh, Npml
+	LambdaRange    = Range<double>(Nano_S(60), Nano_S(700), Nano_S(5));	//380->
 	WaveAngleRange = Range<int>   (0, 0, 10);
 
 	SetWaveParameter( LambdaRange.MIN() );
 	wave_angle  = WaveAngleRange.MIN();
 
 	time = 0;
-	maxStep  = 7000;				//2500->7000
+	maxStep  = 5000;				//2500->5000
 
 	n_s      = new double[mField->getNcel()];	//屈折率
 	//mModel    = new FazzySlabModel(mField);
@@ -78,8 +79,8 @@ void Solver::MiePrint(complex<double>* p, string name){
 
 	if(ofs) {
 		for(int i=0; i<=180; i++){
-			double _x = 1.2*lambda_s*cos((180-i)*PI/180) + mField->getNx()/2;
-			double _y = 1.2*lambda_s*sin((180-i)*PI/180) + mField->getNy()/2;
+			double _x = 1.2*lambda_s*cos(i*PI/180) + mField->getNx()/2;
+			double _y = 1.2*lambda_s*sin(i*PI/180) + mField->getNy()/2;
 			double _val = bilinear_interpolation(p,_x,_y);
 			ofs << _val << endl;
 		}
@@ -340,6 +341,31 @@ void Solver::open_data(complex<double> *data, string name){
 }
 
 
+//OpenCV関係
+//#include <opencv2/opencv.hpp> // インクルードファイル指定
+//#include <opencv2/opencv_lib.hpp> // 静的リンクライブラリの指定
+#include <opencv/cv.h>
+#include <opencv/highgui.h>
+#include <opencv2/core/core.hpp>
+#pragma comment(lib,"opencv_highgui2411.lib")
+#pragma comment(lib,"opencv_core2411.lib")
+
+// @brief 現在の画面の状態をキャプチャしてpngに保存する //
+
+void Solver::capture()
+{
+	int width = WINDOW_W, height = WINDOW_H;
+
+	cv::Mat cvmtx(cv::Size(width, height), CV_8UC4, cv::Scalar(0, 0, 0));//黒で初期化
+																		 // 画像のキャプチャ
+	glReadBuffer(GL_FRONT);// フロントを読み込む様に設定する
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1); // 初期値は4
+	glReadPixels(0, 0, width, height, GL_BGRA_EXT, GL_UNSIGNED_BYTE, (void*)cvmtx.data);
+	//上下逆にする
+	cv::flip(cvmtx, cvmtx, 0);
+	// 画像の書き出し 
+	cv::imwrite(DataDir + "output.png", cvmtx);
+}
 
 //---------------------------------------------//
 //--------------PML----------------------------//

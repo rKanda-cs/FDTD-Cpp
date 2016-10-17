@@ -174,6 +174,7 @@ protected:
 
 	void save_data(complex<double> *data, string name);
 	void open_data(complex<double> *data, string name);
+	void capture();
 
 	// ’†S·•ª‚Ì“ñ‰ñ”÷•ª x•ûŒü	
 	complex<double> Dx2(complex<double>*p, int i, int j, int t){

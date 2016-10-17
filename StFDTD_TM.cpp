@@ -61,11 +61,12 @@ bool StFDTD_TM::calc(){
 		file.open("../../Fourie/Fourie/TM_data2.txt");
 	}
 	*/
-
-	if (time > 7000) {
-		MiePrint(Ez, "time7000_TM_");
+	
+	if (time > 3000) {
+		MiePrint(Ez, "time3000_TM_PML5");
 //		string label = "";
 //		NTFFindexform("", NTFF::NTFFDATA | NTFF::TOTAL);
+		capture();
 		return false;
 	}
 	return true;

@@ -23,8 +23,9 @@ bool StFDTD_TE::calc(){
 	//absorbing();
 	CalcH();
 
-	if(time > 7000){						//time•ÏX
-		MiePrint(Ey, "Mie_TE2");
+	if(time > 3000){						//time•ÏX
+		MiePrint(Ey, "time3000_TE_PML5");
+		capture();
 		return false;
 	}
 
