@@ -92,6 +92,7 @@ void FDTD_TE::Initialize(){
 }
 
 void FDTD_TE::field(){
+	setWorkingDirPass(mModel->mkdir(getDataDirPass()));	//データを保存するディレクトリの設定
 	setWorkingDirPass(MakeDir("TE"));
 
 	for(int i=0; i<mField->getNpx(); i++){

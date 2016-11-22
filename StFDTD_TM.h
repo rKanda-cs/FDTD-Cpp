@@ -12,7 +12,11 @@ public:
 private:
 	void absorbing();
 	void cycle();
-
+	bool EndTask();		//1回のシミュレーションが終わったときの処理
+	void ReStart() {
+		super::Initialize();
+		field();
+	}
 
 	//todo 境界近傍にS-FDTDを使ってない
 	void CalcE() {

@@ -10,7 +10,6 @@
 #include <fstream>
 #include <iostream>
 
-
 #define new ::new(_NORMAL_BLOCK, __FILE__, __LINE__)
 #define _USE_MATH_DEFINES
 
@@ -18,14 +17,14 @@ Solver::Solver()
 	:H_S(1.0), DT_S(1.0)
 {
 	mField = new Field(200, 200, 1, 5); //width, height, ƒ¢h, Npml
-	LambdaRange    = Range<double>(Nano_S(60), Nano_S(700), Nano_S(5));	//380->
-	WaveAngleRange = Range<int>   (0, 0, 10);
+	LambdaRange    = Range<double>(Nano_S(60), Nano_S(700), Nano_S(5));
+	WaveAngleRange = Range<int>   (0, 90, 10);
 
 	SetWaveParameter( LambdaRange.MIN() );
 	wave_angle  = WaveAngleRange.MIN();
 
 	time = 0;
-	maxStep  = 5000;				//2500->5000
+	maxStep  = 3000;
 
 	n_s      = new double[mField->getNcel()];	//‹üÜ—¦
 	//mModel    = new FazzySlabModel(mField);
@@ -79,8 +78,8 @@ void Solver::MiePrint(complex<double>* p, string name){
 
 	if(ofs) {
 		for(int i=0; i<=180; i++){
-			double _x = 1.2*lambda_s*cos(i*PI/180) + mField->getNx()/2;
-			double _y = 1.2*lambda_s*sin(i*PI/180) + mField->getNy()/2;
+			double _x = 1.2*lambda_s*cos(i*PI/180) + mField->getNpx()/2;
+			double _y = 1.2*lambda_s*sin(i*PI/180) + mField->getNpy()/2;
 			double _val = bilinear_interpolation(p,_x,_y);
 			ofs << _val << endl;
 		}
@@ -190,19 +189,36 @@ void Solver::absorbing_nsRL(complex<double> *p, int X, enum DIRECT offset){
 	double kx_b = kx_s*H_S/2;
 	double ky_b = ky_s*H_S/2;
 
-	for(int j=1; j<mField->getNy()-1; j++){
-		u1 = tan(w_b/n_s[index(X,j)]) / tan(k_b);
-		u2 = 2 * _pow(sin(w_b/N_S(X,j)), 2) / _pow(sin(ky_b),2) * (1 - tan(kx_b)/tan(k_b));
+	for (int j = 1; j < mField->getNpy() - 1; j++) {
+		u1 = tan(w_b / n_s[index(X, j)]) / tan(k_b);
+		u2 = 2 * _pow(sin(w_b / N_S(X, j)), 2) / _pow(sin(ky_b), 2) * (1 - tan(kx_b) / tan(k_b));
 
-		if(j == 1 || j == mField->getNy()-2)		// l‹÷‚Ì‰¡‚ÍˆêŸŒ³‹zû‹«ŠE
+		if(j == 1 || j == mField->getNpy()-2)		// l‹÷‚Ì‰¡‚ÍˆêŸŒ³‹zû‹«ŠE
 			p[index(X,j, +1)] = p[index(X+offset,j, 0)] + (1- u1)/(1+u1)*(p[index(X,j, 0)] - p[index(X+offset,j, +1)]);
 
-		else						//‚»‚êˆÈŠO‚Í“ñŸŒ³‹zû‹«ŠE
-			p[index(X,j, +1)] = - p[index(X+offset,j, -1)] 
-								- (1-u1)/(1+u1)*(p[index(X,j, -1)] + p[index(X+offset,j, +1)]) 
-								+     2/(1+u1)*(p[index(X,j,  0)] + p[index(X+offset,j,  0)]) 
-								+ u2*u2/(1+u1)/2*( Dy2(p, X,j, 0)   +  Dy2(p, X+offset,j, 0)	);
-												        //  dy^2 ƒÓn     +   dy^2 ƒÓb
+/*		if (j == 1) {
+			complex <double> D2_1 = p[index(j + 1, X, 0)] + p[index(mField->getNpy() - 2, X, 0)] - 2.0*p[index(j, X, 0)];
+			complex <double> D2_2 = p[index(j + 1, X + offset, 0)] + p[index(mField->getNpy() - 2, X + offset, 0)] - 2.0*p[index(j, X + offset, 0)];
+			p[index(j, X, +1)] = -p[index(j, X + offset, -1)]
+				- (1 - u1) / (1 + u1)*(p[index(j, X, -1)] + p[index(j, X + offset, +1)])
+				+ 2 / (1 + u1)*(p[index(j, X, 0)] + p[index(j, X + offset, 0)])
+				+ u2*u2 / (1 + u1) / 2 * (D2_1 + D2_2 + Dt2(p, X, j) + Dt2(p, X + offset, j));
+		}
+		else if (j == mField->getNpy() - 2) {
+			complex <double> D2_1 = p[index(1, X, 0)] + p[index(j - 1, X, 0)] - 2.0*p[index(j, X, 0)];
+			complex <double> D2_2 = p[index(1, X + offset, 0)] + p[index(j - 1, X + offset, 0)] - 2.0*p[index(j, X + offset, 0)];
+			p[index(j, X, +1)] = -p[index(j, X + offset, -1)]
+				- (1 - u1) / (1 + u1)*(p[index(j, X, -1)] + p[index(j, X + offset, +1)])
+				+ 2 / (1 + u1)*(p[index(j, X, 0)] + p[index(j, X + offset, 0)])
+				+ u2*u2 / (1 + u1) / 2 * (D2_1 + D2_2 + Dt2(p, X, j) + Dt2(p, X + offset, j));
+		}
+*/		else {						//‚»‚êˆÈŠO‚Í“ñŸŒ³‹zû‹«ŠE
+			p[index(X, j, +1)] = -p[index(X + offset, j, -1)]
+				- (1 - u1) / (1 + u1)*(p[index(X, j, -1)] + p[index(X + offset, j, +1)])
+				+ 2 / (1 + u1)*(p[index(X, j, 0)] + p[index(X + offset, j, 0)])
+				+ u2*u2 / (1 + u1) / 2 * (Dy2(p, X, j, 0) + Dy2(p, X + offset, j, 0) + Dt2(p, X, j) + Dt2(p, X + offset, j));
+											//  dy^2 ƒÓn     +   dy^2 ƒÓb
+		}
 	}
 }
 
@@ -220,19 +236,36 @@ void Solver::absorbing_nsTB(complex<double> *p, int Y, enum DIRECT offset){
 	double kx_b = kx_s*H_S/2;
 	double ky_b = ky_s*H_S/2;
 
-	for(int i=1; i<mField->getNx()-1; i++){
+	for(int i=1; i<mField->getNpx()-1; i++){
 		u1 = tan(w_b/n_s[index(i,Y)]) / tan(k_b);
 		u2 = 2 * _pow(sin(w_b/n_s[index(i,Y)]), 2) / _pow(sin(ky_b),2) * (1 - tan(kx_b)/tan(k_b));
 
-		if(i==1 || i==mField->getNx()-2)	//l‹÷‚Ì‰¡‚ÍˆêŸŒ³‹zû‹«ŠE
+		if(i==1 || i==mField->getNpx()-2)	//l‹÷‚Ì‰¡‚ÍˆêŸŒ³‹zû‹«ŠE
 			p[index(i,Y, +1)] = p[index(i,Y+offset, 0)] + (1- u1)/(1+u1)*(p[index(i,Y, 0)] - p[index(i,Y+offset, +1)]);
 
-		else				//“ñŸŒ³‹zû‹«ŠE
-			p[index(i,Y, +1)] = - p[index(i,Y+offset, -1)]    
-								- (1-u1)/(1+u1)*(p[index(i,Y, -1)] + p[index(i,Y+offset, +1)]) 
-							    +     2/(1+u1)*(p[index(i,Y, 0)]  + p[index(i,Y+offset, 0)])     
-								+ u2*u2/(1+u1)/2*( Dx2(p, i,Y, 0)   + Dx2(p, i,Y+offset, 0) 	);
-												  //  dx^2 ƒÓn     +   dx^2 ƒÓb
+/*		if (i == 1) {
+			complex <double> D2_1 = p[index(i + 1, Y, 0)] + p[index(mField->getNpx() - 2, Y, 0)] - 2.0*p[index(i, Y, 0)];
+			complex <double> D2_2 = p[index(i + 1, Y + offset, 0)] + p[index(mField->getNpx() - 2, Y + offset, 0)] - 2.0*p[index(i, Y + offset, 0)];
+			p[index(i, Y, +1)] = -p[index(i, Y + offset, -1)]
+				- (1 - u1) / (1 + u1)*(p[index(i, Y, -1)] + p[index(i, Y + offset, +1)])
+				+ 2 / (1 + u1)*(p[index(i, Y, 0)] + p[index(i, Y + offset, 0)])
+				+ u2*u2 / (1 + u1) / 2 * (D2_1 + D2_2 + Dt2(p, i, Y) + Dt2(p, i, Y + offset));
+		}
+		else if (i == mField->getNpx() - 2) {
+			complex <double> D2_1 = p[index(1, Y, 0)] + p[index(i - 1, Y, 0)] - 2.0*p[index(i, Y, 0)];
+			complex <double> D2_2 = p[index(1, Y + offset, 0)] + p[index(i - 1, Y + offset, 0)] - 2.0*p[index(i, Y + offset, 0)];
+			p[index(i, Y, +1)] = -p[index(i, Y + offset, -1)]
+				- (1 - u1) / (1 + u1)*(p[index(i, Y, -1)] + p[index(i, Y + offset, +1)])
+				+ 2 / (1 + u1)*(p[index(i, Y, 0)] + p[index(i, Y + offset, 0)])
+				+ u2*u2 / (1 + u1) / 2 * (D2_1 + D2_2 + Dt2(p, i, Y) + Dt2(p, i, Y + offset));
+		}
+*/		else {				//“ñŸŒ³‹zû‹«ŠE
+			p[index(i, Y, +1)] = -p[index(i, Y + offset, -1)]
+				- (1 - u1) / (1 + u1)*(p[index(i, Y, -1)] + p[index(i, Y + offset, +1)])
+				+ 2 / (1 + u1)*(p[index(i, Y, 0)] + p[index(i, Y + offset, 0)])
+				+ u2*u2 / (1 + u1) / 2 * (Dx2(p, i, Y, 0) + Dx2(p, i, Y + offset, 0) + Dt2(p, i, Y) + Dt2(p, i, Y + offset));
+											//  dx^2 ƒÓn     +   dx^2 ƒÓb
+		}
 	}		
 }
 
@@ -273,7 +306,7 @@ void Solver::draw(Complex *p, Complex *q){
 		}
 	}
 
-	//draw_model();
+	draw_model();
 }
 
 //---------------------------•`‰æ------------------------------//
@@ -296,7 +329,7 @@ void Solver::draw(complex<double> *p){
 		}
 	}
 
-	//draw_model();
+	draw_model();
 }
 
 //U—‘Ì‚Ì•`‰æ
@@ -312,8 +345,12 @@ void Solver::draw_model(){
 			const double n = N_S(i,j);	//‚±‚±‚Å,‹üÜ—¦‚ğ‘‚«Š·‚¦‚Ä‚Í‚¢‚¯‚È‚¢
 
 			if(n == 1.0) continue;	//‹üÜ—¦‚ª1‚È‚ç‚Æ‚Î‚·
-			glColor4d(0.7/n, 0.7/n, 0.7/n, 0.1);
-			glRectd(x*ws-1, y*hs-1, (x+1.0)*ws-1, (y+1.0)*hs-1);	
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			glDepthMask(GL_FALSE);
+			glColor4d(0.7/n, 0.7/n, 0.7/n, 0.6);
+			glDepthMask(GL_TRUE);
+		glRectd(x*ws-1, y*hs-1, (x+1.0)*ws-1, (y+1.0)*hs-1);	
 		}
 	}
 }

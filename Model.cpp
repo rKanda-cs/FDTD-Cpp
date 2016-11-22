@@ -8,7 +8,7 @@ FazzyMieModel::FazzyMieModel(Field *f, double _r):
 FazzyModel(f),r(_r)
 {
 	ep = 1.6*1.6*EPSILON_0_S;			//誘電率 = (屈折率)^2
-		cout << r << endl;
+		cout << "r=" + to_s((int)mField->cellToNano(r)) << endl;
 }
 
 string FazzyMieModel::mkdir(string root){
@@ -59,7 +59,7 @@ FazzyModel(f), ep1(2.0*2.0*EPSILON_0_S), ep2(EPSILON_0_S), width1(250), width2(5
 }
 
 double FazzySlabModel::calcEPS(const double& x, const double& y, enum INTEG f){
-//左100nmから,250nm間隔で50nmのスラブを入れていく
+//左100nmから,250nm間隔で50nmのスラブを入れていく  **10nmスラブに変更(L73)
 //多層膜
 	
 	double mx = x - mField->getNpml(); //計算領域内へ写像
@@ -70,7 +70,7 @@ double FazzySlabModel::calcEPS(const double& x, const double& y, enum INTEG f){
 	int k    = (int)(mField->cellToNano(mx) - 100)%250;
 	double l =      (mField->cellToNano(mx) - 100)/250;
 
-	if( k > 0 && k <=50 && l < 5)
+	if( k > 0 && k <=10 && l < 5)
 		return ep1;
 	else
 		return ep2;
@@ -96,7 +96,7 @@ FazzyModel(f), shelf(kind)
 	// ep[0] = 1.45*1.45*EPSILON_0_S;
 	ep[1] = 1.56*1.56*EPSILON_0_S;	//誘電率
 	ep[0] = 1.0*1.0*EPSILON_0_S;
-	width = mField->nanoToCell(150);	//横幅は150で固定
+	width = mField->nanoToCell(300);	//横幅は150で固定  **論文では300
 
 	min = mField->nanoToCell(120);
 	max = mField->nanoToCell(120);

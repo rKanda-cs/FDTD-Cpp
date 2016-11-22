@@ -45,10 +45,11 @@ public:
 		Max = max(mi,ma);
 	}
 	
-	Range(T mi, T ma, T in):interval(in)
+	Range(T mi, T ma, T in)
 	{
 		Min = min(mi,ma);
 		Max = max(mi,ma);
+		interval = in;
 	}
 
 	Range(T m):Min(m), Max(m)
@@ -157,6 +158,8 @@ protected:
 				SetWaveParameter(LambdaRange.MIN());
 			}
 		}
+		cout << to_s(Inv_Nano_S(lambda_s)) + "nm" << endl;
+		cout << to_s(wave_angle) + "deg" << endl;
 		return true;
 	}
 
@@ -191,10 +194,17 @@ protected:
 		return p[index(i,j, +1)] + p[index(i,j, -1)] - 2.0*p[index(i,j, 0)];
 	};
 
+	//DxDy2 = Dx2Dy
+	complex<double> DxDy2(complex<double> *p, int i, int j, int t) {
+		return     p[index(i + 1, j - 1, t)] + p[index(i + 1, j + 1, t)] + p[index(i - 1, j - 1, t)] + p[index(i - 1, j + 1, t)]
+			- 2.0*(p[index(i + 1, j, t)] + p[index(i - 1, j, t)] + p[index(i, j + 1, t)] + p[index(i, j - 1, t)])
+			+ 4.0*p[index(i, j, t)];
+	};
+
 	int index(const int& i, const int& j, const int& t){
 		int k = ( t + (int)time + 3) % 3;
-		//return k*mField->getNcel() + index(i,j);
-		return index(i,j);
+		return k*mField->getNcel() + index(i,j);
+		//return index(i,j);
 	};
 
 	int index(const int& i, const int& j){
@@ -204,8 +214,8 @@ protected:
 	//pml—p‚Ì”z—ñ”Ô†Žæ“¾
 	int pmlIndex(const int &i, const int &j, const int &t){
 		int k = ( t + (int)time + 3) % 3;
-		//return k*mField->getNcel() + pmlIndex(i,j);
-		return pmlIndex(i,j); //todo
+		return k*mField->getNcel() + pmlIndex(i,j);
+		//return pmlIndex(i,j); //todo
 	}
 
 	int pmlIndex(const int &i, const int &j){

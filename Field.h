@@ -35,11 +35,11 @@ public:
 	}
 
 	//nm単位の物理量をシミュレーション値に変換
-	int nanoToCell(const int &length){
+	double nanoToCell(const double &length){
 		return length/H_U;
 	}
 
-	int cellToNano(const int &cell){
+	double cellToNano(const double &cell){
 		return cell*H_U;
 	}
 

@@ -18,8 +18,8 @@ FDTD_TM::FDTD_TM()
 	Ez  = new complex<double>[mField->getNcel()];		//Ez(i,j)      → Ez(i,j)
 	Hx  = new complex<double>[mField->getNcel()];		//Hx(i, j+0.5) → Hx(i,j)
 	Hy  = new complex<double>[mField->getNcel()];		//Hy(i+0.5, j) → Hy(i,j) を意味する
-	Ezx = new Complex[mField->getNcel()];
-	Ezy = new Complex[mField->getNcel()];
+	Ezx = new complex<double>[mField->getNcel()];
+	Ezy = new complex<double>[mField->getNcel()];
 
 	//計算用定数配列
 	C_EZ     = new double[mField->getNcel()];	//Cez(i, j)       → CEZ(i,j)
@@ -39,6 +39,15 @@ FDTD_TM::FDTD_TM()
 	EPS_EZ = new double[mField->getNcel()];
 	EPS_HX = new double[mField->getNcel()];
 	EPS_HY = new double[mField->getNcel()];
+
+	B_EZXp = new double[mField->getNcel()];
+	B_EZXm = new double[mField->getNcel()];
+	B_EZYp = new double[mField->getNcel()];
+	B_EZYm = new double[mField->getNcel()];
+	B_HXp = new double[mField->getNcel()];
+	B_HXm = new double[mField->getNcel()];
+	B_HYp = new double[mField->getNcel()];
+	B_HYm = new double[mField->getNcel()];
 
 	//領域初期化
 	for(int i=0; i<mField->getNcel(); i++)
@@ -68,14 +77,24 @@ FDTD_TM::~FDTD_TM(){
 	delete[] EPS_EZ;
 	delete[] EPS_HX;
 	delete[] EPS_HY;
+
+	delete[] B_EZXp;
+	delete[] B_EZXm;
+	delete[] B_EZYp;
+	delete[] B_EZYm;
+	delete[] B_HXp;
+	delete[] B_HXm;
+	delete[] B_HYp;
+	delete[] B_HYm;
+
 	cout << "FDTD_TM Destructor" << endl;
 }
 
 void FDTD_TM::Initialize(){
 	super::Initialize();
 	//領域初期化
-	for(int i=0; i<3*mField->getNcel(); i++)
-			Ez[i] = Hx[i] = Hy[i] = 0;
+	for(int i=0; i<mField->getNcel(); i++)
+			Ez[i] = Hx[i] = Hy[i] = Ezx[i] = Ezy[i] = 0;
 }
 
 void FDTD_TM::OpenData(string prefix){
@@ -96,6 +115,7 @@ void FDTD_TM::SaveData(string prefix){
 }
 
 void FDTD_TM::field(){
+	setWorkingDirPass(mModel->mkdir(getDataDirPass()));	//データを保存するディレクトリの設定
 	setWorkingDirPass(MakeDir("TM"));
 	for(int i=0; i<mField->getNpx(); i++){
 		for(int j=0; j<mField->getNpy(); j++){
@@ -173,8 +193,8 @@ void FDTD_TM::PML(){
 void FDTD_TM::NTFFindexform(string label, NTFF::output flag){
 	cout << "NTF start" << endl;
 
-	int cx = mField->getNx()/2;	//座標変換後の原点
-	int cy = mField->getNy()/2;
+	int cx = mField->getNpx()/2;	//座標変換後の原点
+	int cy = mField->getNpy()/2;
 
 	double r0 = 1.0e6;
     complex<double> iu( 0.0, 1.0 );		//単位虚数ベクトル
@@ -191,7 +211,8 @@ void FDTD_TM::NTFFindexform(string label, NTFF::output flag){
 	double strength[360];
 	int max_angle = 360;
 	for(int ang=0; ang<max_angle; ang++){
-		double rad = ang*M_PI/180.0;
+		//double rad = ang*M_PI/180.0;
+		double rad = (ang-90)*M_PI / 180.0;
 		Vec2<double> r(cos(rad), sin(rad));		//遠方の方向ベクトル.
 		Vec2<double> r2;						//中心からセルまでの距離
 

@@ -23,6 +23,11 @@ Simulator::Simulator() {
 	else if(mode == 4)	solv = new NsFDTD_TE();
 	else exit(-1);
 
+//	solv = new StFDTD_TM();
+//	solv = new StFDTD_TE();
+//	solv = new NsFDTD_TM();
+//	solv = new NsFDTD_TE();
+
 	solv->field();
 }
 

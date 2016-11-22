@@ -31,7 +31,7 @@ private:
 #endif
 			//“dŠE‚ÌŒvŽZEx
 			for (int i = 1; i < mField->getNpx() - 1; i++) {
-				for (int j = 1; j < mField->getNpy() - 1; j++) {
+				for (int j = 0; j < mField->getNpy() - 1; j++) {
 					EX(i, j, +1) = CEX(i, j)*EX(i, j, 0)
 						+ CEXLY(i, j)*(R_P*(HZ(i, j + 1, 0) - HZ(i, j, 0))
 							+ R_M*Dy2_n(Hz, i, j, 0)
@@ -43,7 +43,7 @@ private:
 #pragma omp for
 #endif
 			//“dŠE‚ÌŒvŽZEy
-			for (int i = 1; i < mField->getNpx() - 1; i++) {
+			for (int i = 0; i < mField->getNpx() - 1; i++) {
 				for (int j = 1; j < mField->getNpy() - 1; j++) {
 					EY(i, j, +1) = CEY(i, j)*EY(i, j, 0)
 						- CEYLX(i, j)*(R_P*(HZ(i + 1, j, 0) - HZ(i, j, 0))

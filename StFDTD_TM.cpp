@@ -63,12 +63,25 @@ bool StFDTD_TM::calc(){
 	*/
 	
 	if (time > 3000) {
-		MiePrint(Ez, "time3000_TM_PML5");
-//		string label = "";
-//		NTFFindexform("", NTFF::NTFFDATA | NTFF::TOTAL);
+		MiePrint(Ez, "time3000_PML5");
 		capture();
-		return false;
+		return EndTask();
 	}
+	return true;
+}
+
+//----------------終了時の仕事------------------------//
+bool StFDTD_TM::EndTask() {
+	cout << "End Task" << endl;
+
+	string label = "";
+	NTFFindexform("", NTFF::NTFFDATA | NTFF::TOTAL);	// label -> "" にしたけど動くか確認してない.
+
+														//終了条件の確認
+	if (!Terminate())
+		return false;
+
+	ReStart();
 	return true;
 }
 

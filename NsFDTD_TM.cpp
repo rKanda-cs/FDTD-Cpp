@@ -16,16 +16,22 @@ NsFDTD_TM::~NsFDTD_TM(){
 };
 
 
-bool NsFDTD_TM::calc(){
-	CalcE();	//ìdèÍÇÃåvéZ
+bool NsFDTD_TM::calc() {
+	//CalcE();	//ìdèÍÇÃåvéZ
+	CalcE_PML();
 	NsScatteredWave(wave_angle);	//éUóêîgÇÃì¸éÀ
-	pointLightSource(Ez);
-	absorbing();					//ãzé˚ã´äE
+	//pointLightSource(Ez);
+	//CalcH();	//é•èÍÇÃåvéZ
+	CalcH_PML();
+	
+	//absorbing();					//ãzé˚ã´äE
 
-	CalcH();	//é•èÍÇÃåvéZ
 	//ButtonFactory::setButton("EZ", norm(EZ(mField->getNx()/2+10, mField->getNy()/2)));
-	if(time>maxStep)
+	if (time > maxStep) {
+		MiePrint(Ez, "time3000_PML5");
+		capture();
 		return EndTask();
+	}
 
 	return true;
 };
@@ -49,9 +55,9 @@ bool NsFDTD_TM::EndTask(){
 void NsFDTD_TM::field(){		
 	super::field();										//óUìdó¶ÇÃê›íË
 	setWorkingDirPass(MakeDir("Ns"));
-	setWorkingDirPass(mModel->mkdir(getDataDirPass()));	//ÉfÅ[É^Çï€ë∂Ç∑ÇÈÉfÉBÉåÉNÉgÉäÇÃê›íË
 	R_M = NsCoef();		//ç∑ï™ââéZópÇÃåvéZíËêîÇÃê›íË
 	R_P = 1.0-R_M;
+
 	for(int i=0; i<mField->getNpx(); i++){
 		for(int j=0; j<mField->getNpy(); j++){
 			double mu = MU_0_S;
@@ -60,7 +66,6 @@ void NsFDTD_TM::field(){
 			double u_hx = sin(w_s/sqrt(EPSHX(i,j)/EPSILON_0_S)*DT_S/2)/ sin(k_s*DT_S/2);
 			double u_hy = sin(w_s/sqrt(EPSHY(i,j)/EPSILON_0_S)*DT_S/2)/ sin(k_s*DT_S/2);
 			
-			
 			CEZ(i,j)   = 1;							//(1 - tanh(a*h_s)) / (1 + tanh(a*H_S));
 			CEZLH(i,j) = u_ez*sqrt(mu/EPSEZ(i,j));		//u' Å„(É /É√)*(1/(1+tanh(a*H_S)))				
 			CHXLY(i,j) = u_hx*sqrt(EPSHX(i,j)/mu);		//u' Å„(É√/É )
@@ -68,13 +73,87 @@ void NsFDTD_TM::field(){
 		}
 	}
 	cout << "Ns_TM_Field" << endl;
+
+	
+	PMLfield();
+}
+
+void NsFDTD_TM::PMLfield() {
+	double mu = MU_0_S;
+
+	for (int i = 0; i < mField->getNpx(); i++) {
+		for (int j = 0; j < mField->getNpy(); j++) {
+			double sig_x = mField->sigmaX(i, j);			//É–x, É–x*, É–y, É–y* Å@Å@<- B-PMLÇÃåWêî
+			double sig_xx = mu / EPSILON_0_S * sig_x;
+			double sig_y = mField->sigmaY(i, j);
+			double sig_yy = mu / EPSILON_0_S * sig_y;
+
+			double ax = sig_x / (2 * EPSEZ(i, j));
+			double ay = sig_y / (2 * EPSEZ(i, j));
+			double axx = sig_xx / (2 * mu);
+			double ayy = sig_yy / (2 * mu);
+
+			CEZX(i, j) = MaxwellCoef(EPSEZ(i, j), sig_x);
+			CEZXLX(i, j) = MaxwellCoef2(EPSEZ(i, j), sig_x);
+
+			CEZY(i, j) = MaxwellCoef(EPSEZ(i, j), sig_y);
+			CEZYLY(i, j) = MaxwellCoef2(EPSEZ(i, j), sig_y);
+/*
+			BEZXP(i, j) = 1 + tanh(ax * DT_S);
+			BEZXM(i, j) = 1 - tanh(ax * DT_S);
+			BEZYP(i, j) = 1 + tanh(ay * DT_S);
+			BEZYM(i, j) = 1 - tanh(ay * DT_S);
+			BHXP(i, j) = 1 + tanh(axx * DT_S);
+			BHXM(i, j) = 1 - tanh(axx * DT_S);
+			BHYP(i, j) = 1 + tanh(ayy * DT_S);
+			BHYM(i, j) = 1 - tanh(ayy * DT_S);
+*/
+			BEZXP(i, j) = 1 + (tanh(ax) / (1 + tanh(ax)*tanh(axx)));
+			BEZXM(i, j) = 1 - (tanh(ax) / (1 + tanh(ax)*tanh(axx)));
+			BEZYP(i, j) = 1 + (tanh(ay) / (1 + tanh(ay)*tanh(ayy)));
+			BEZYM(i, j) = 1 - (tanh(ay) / (1 + tanh(ay)*tanh(ayy)));
+			BHXP(i, j) = 1 + (tanh(axx) / (1 + tanh(ax)*tanh(axx)));
+			BHXM(i, j) = 1 - (tanh(axx) / (1 + tanh(ax)*tanh(axx)));
+			BHYP(i, j) = 1 + (tanh(ayy) / (1 + tanh(ay)*tanh(ayy)));
+			BHYM(i, j) = 1 - (tanh(ayy) / (1 + tanh(ay)*tanh(ayy)));
+
+			BEZXP(i, j) = 1 / BEZXP(i, j);
+			BEZYP(i, j) = 1 / BEZYP(i, j);
+			BHXP(i, j) = 1 / BHXP(i, j);
+			BHYP(i, j) = 1 / BHYP(i, j);
+
+		}
+	}
+	cout << "PML_field" << endl;
 }
 
 void NsFDTD_TM::absorbing(){
-	absorbing_nsRL(Ez, 0,	 LEFT);
-	absorbing_nsRL(Ez, mField->getNx()-1, RIGHT);
-	absorbing_nsTB(Ez, 0,    BOTTOM);
-	absorbing_nsTB(Ez, mField->getNy()-1, TOP);
+	absorbing_nsRL(Hy, 0,	 LEFT);						//ç∂ï«
+//	absorbing_nsRL(Ez, 0, LEFT);
+
+	absorbing_nsRL(Hy, mField->getNpx()-2, RIGHT);		//âEï«
+//	absorbing_nsRL(Ez, mField->getNpx() - 2, RIGHT);
+
+	absorbing_nsTB(Hx, 0,    BOTTOM);					//â∫ï«
+//	absorbing_nsTB(Ez, 0, BOTTOM);
+
+	absorbing_nsTB(Hx, mField->getNpy()-2, TOP);			//è„ï«
+//	absorbing_nsTB(Ez, mField->getNpy() - 2, TOP);
+
+
+	for (int i = 0; i < mField->getNpx() - 1; i++) {
+		HY(i, 0) = 0;
+		HY(i, mField->getNpy() - 1) = 0;
+		EZ(i, 0) = 0;
+		EZ(i, mField->getNpy() - 1) = 0;
+	}
+	for (int j = 0; j < mField->getNpy() - 1; j++) {
+		HX(0, j) = 0;
+		HX(mField->getNpx() - 1, j) = 0;
+		EZ(0, j) = 0;
+		EZ(mField->getNpx() - 1, j) = 0;
+	}
+	EZ(mField->getNpx()-1, mField->getNpy()-1) = 0;
 }
 
 /* FieldÇÃåWêîê›íËÇÃïîï™

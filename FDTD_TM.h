@@ -21,6 +21,9 @@ protected:
 	double *C_EZX, *C_EZY, *C_EZXLX, *C_EZYLY;
 	double *C_HX, *C_HY;
 	double *EPS_EZ, *EPS_HX, *EPS_HY;
+	double *B_EZXp, *B_EZXm, *B_EZYp, *B_EZYm; //pml•t‚«NsFDTD—p
+	double *B_HXp, *B_HXm, *B_HYp, *B_HYm;
+
 
 public:
 	FDTD_TM();
@@ -110,6 +113,38 @@ protected:
 
 	double& EPSHY(const int &i, const int &j){
 		return EPS_HY[index(i,j)];
+	};
+
+	double& BEZXP(const int &i, const int &j) {
+		return B_EZXp[index(i, j)];
+	};
+
+	double& BEZXM(const int &i, const int &j) {
+		return B_EZXm[index(i, j)];
+	};
+
+	double& BEZYP(const int &i, const int &j) {
+		return B_EZYp[index(i, j)];
+	};
+
+	double& BEZYM(const int &i, const int &j) {
+		return B_EZYm[index(i, j)];
+	};
+
+	double& BHXP(const int &i, const int &j) {
+		return B_HXp[index(i, j)];
+	};
+
+	double& BHXM(const int &i, const int &j) {
+		return B_HXm[index(i, j)];
+	};
+
+	double& BHYP(const int &i, const int &j) {
+		return B_HYp[index(i, j)];
+	};
+
+	double& BHYM(const int &i, const int &j) {
+		return B_HYm[index(i, j)];
 	};
 
 	complex<double> EZ_NTF(const int &i, const int &j){
