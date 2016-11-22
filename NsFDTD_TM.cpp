@@ -139,21 +139,6 @@ void NsFDTD_TM::absorbing(){
 
 	absorbing_nsTB(Hx, mField->getNpy()-2, TOP);			//ã•Ç
 //	absorbing_nsTB(Ez, mField->getNpy() - 2, TOP);
-
-
-	for (int i = 0; i < mField->getNpx() - 1; i++) {
-		HY(i, 0) = 0;
-		HY(i, mField->getNpy() - 1) = 0;
-		EZ(i, 0) = 0;
-		EZ(i, mField->getNpy() - 1) = 0;
-	}
-	for (int j = 0; j < mField->getNpy() - 1; j++) {
-		HX(0, j) = 0;
-		HX(mField->getNpx() - 1, j) = 0;
-		EZ(0, j) = 0;
-		EZ(mField->getNpx() - 1, j) = 0;
-	}
-	EZ(mField->getNpx()-1, mField->getNpy()-1) = 0;
 }
 
 /* Field‚ÌŒW”İ’è‚Ì•”•ª

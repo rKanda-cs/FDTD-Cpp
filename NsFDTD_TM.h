@@ -40,7 +40,7 @@ private:
 		for (int i = 1; i < mField->getNpx() - 1; i++) {
 			for (int j = 1; j < mField->getNpy() - 1; j++) {
 				if(i == 1 || i == mField->getNpx()-2 || j == 1 || j == mField->getNpy()-2)
-					EZ(i, j) = 1.0*EZ(i, j) + 1/EPSEZ(i, j)*(HY(i, j) - HY(i - 1, j) - ( HX(i, j) - HX(i, j - 1) ));	//StFDTD
+					EZ(i, j, +1) = 1.0*EZ(i, j, 0) + 1/EPSEZ(i, j)*(HY(i, j, 0) - HY(i - 1, j, 0) - ( HX(i, j, 0) - HX(i, j - 1, 0) ));	//StFDTD
 				else
 					EZ(i, j, +1) = CEZ(i, j)*EZ(i, j, 0)
 					+ CEZLH(i, j)*(R_P*(HY(i, j, 0) - HY(i - 1, j, 0) - (HX(i, j, 0) - HX(i, j - 1, 0)))	//dx(Hy) - dy(Hy)
@@ -81,8 +81,6 @@ private:
 	void absorbing();	//ãzé˚ã´äE
 
 	// Ns_PML
-	//ñ¢äÆê¨
-
 	void CalcE_PML(){		
 	#ifdef _OPENMP
 	#pragma omp parallel
@@ -94,9 +92,9 @@ private:
 			for (int i = 1; i < mField->getNpx() - 1; i++) {
 				for (int j = 1; j < mField->getNpy() - 1; j++) {
 					if (i == 1 || i == mField->getNpx() - 2 || j == 1 || j == mField->getNpy() - 2)
-						EZX(i, j) = CEZX(i, j)*EZX(i, j) + CEZXLX(i, j)*(HY(i, j) - HY(i - 1, j));	//StFDTD
+						EZX(i, j, +1) = CEZX(i, j)*EZX(i, j, 0) + CEZXLX(i, j)*(HY(i, j, 0) - HY(i - 1, j, 0));	//StFDTD
 					else
-						EZX(i, j) = BEZXP(i, j)*BEZXM(i, j)*EZX(i, j)
+						EZX(i, j, +1) = BEZXP(i, j)*BEZXM(i, j)*EZX(i, j, 0)
 						+ BEZXP(i, j)*CEZLH(i, j)*(R_P*(HY(i, j, 0) - HY(i - 1, j, 0)) + R_M*Dx2_n(Hy, i, j, 0));
 												 //*Dx0_n(Hy, i, j, 0);
 				}
@@ -108,9 +106,9 @@ private:
 			for (int i = 1; i < mField->getNpx() - 1; i++) {
 				for (int j = 1; j < mField->getNpy() - 1; j++) {
 					if (i == 1 || i == mField->getNpx() - 2 || j == 1 || j == mField->getNpy() - 2)
-						EZY(i, j) = CEZY(i, j)*EZY(i, j) - CEZYLY(i, j)*(HX(i, j) - HX(i, j - 1));	//StFDTD
+						EZY(i, j, +1) = CEZY(i, j)*EZY(i, j, 0) - CEZYLY(i, j)*(HX(i, j, 0) - HX(i, j - 1, 0));	//StFDTD
 					else
-						EZY(i, j) = BEZYP(i, j)*BEZYM(i, j)*EZY(i, j)
+						EZY(i, j, +1) = BEZYP(i, j)*BEZYM(i, j)*EZY(i, j, 0)
 						- BEZYP(i, j)*CEZLH(i, j)*(R_P*(HX(i, j, 0) - HX(i, j - 1, 0)) + R_M*Dy2_n(Hx, i, j, 0));
 												 //*Dy0_n(Hx, i, j, 0);
 				}
@@ -127,7 +125,7 @@ private:
 							+ R_M*(Dx2_n(Hy, i, j, 0) - Dy2_n(Hx, i, j, 0))
 							);
 					else
-*/					EZ(i, j) = EZX(i, j) + EZY(i, j);
+*/					EZ(i, j, +1) = EZX(i, j, +1) + EZY(i, j, +1);
 		}
 	}
 
