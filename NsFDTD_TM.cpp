@@ -28,8 +28,8 @@ bool NsFDTD_TM::calc() {
 
 	//ButtonFactory::setButton("EZ", norm(EZ(mField->getNx()/2+10, mField->getNy()/2)));
 	if (time > maxStep) {
-		MiePrint(Ez, "time3000_PML5");
-		capture();
+		//MiePrint(Ez, "time"+to_s(maxStep)+"_PML"+to_s(mField->getNpml()));
+		//capture();
 		return EndTask();
 	}
 
@@ -68,8 +68,8 @@ void NsFDTD_TM::field(){
 			
 			CEZ(i,j)   = 1;							//(1 - tanh(a*h_s)) / (1 + tanh(a*H_S));
 			CEZLH(i,j) = u_ez*sqrt(mu/EPSEZ(i,j));		//u' Å„(É /É√)*(1/(1+tanh(a*H_S)))				
-			CHXLY(i,j) = u_hx*sqrt(EPSHX(i,j)/mu);		//u' Å„(É√/É )
-			CHYLX(i,j) = u_hy*sqrt(EPSHY(i,j)/mu);		//u' Å„(É√/É )
+			CHXLYNS(i,j) = u_hx*sqrt(EPSHX(i,j)/mu);		//u' Å„(É√/É )
+			CHYLXNS(i,j) = u_hy*sqrt(EPSHY(i,j)/mu);		//u' Å„(É√/É )
 		}
 	}
 	cout << "Ns_TM_Field" << endl;
@@ -92,12 +92,13 @@ void NsFDTD_TM::PMLfield() {
 			double ay = sig_y / (2 * EPSEZ(i, j));
 			double axx = sig_xx / (2 * mu);
 			double ayy = sig_yy / (2 * mu);
-
-			CEZX(i, j) = MaxwellCoef(EPSEZ(i, j), sig_x);
-			CEZXLX(i, j) = MaxwellCoef2(EPSEZ(i, j), sig_x);
-
-			CEZY(i, j) = MaxwellCoef(EPSEZ(i, j), sig_y);
-			CEZYLY(i, j) = MaxwellCoef2(EPSEZ(i, j), sig_y);
+/*
+			CHX(i, j) = MaxwellCoef(MU_0_S, sig_yy);			// 1- É–/É 			  1/É 
+			CHXLY(i, j) = MaxwellCoef2(MU_0_S, sig_yy);			// --------			--------
+																// 1+ É–/É 			1+ É–/É 
+			CHY(i, j) = MaxwellCoef(MU_0_S, sig_xx);
+			CHYLX(i, j) = MaxwellCoef2(MU_0_S, sig_xx);
+*/
 /*
 			BEZXP(i, j) = 1 + tanh(ax * DT_S);
 			BEZXM(i, j) = 1 - tanh(ax * DT_S);
@@ -121,39 +122,23 @@ void NsFDTD_TM::PMLfield() {
 			BEZYP(i, j) = 1 / BEZYP(i, j);
 			BHXP(i, j) = 1 / BHXP(i, j);
 			BHYP(i, j) = 1 / BHYP(i, j);
-
 		}
 	}
 	cout << "PML_field" << endl;
 }
 
 void NsFDTD_TM::absorbing(){
-	absorbing_nsRL(Hy, 0,	 LEFT);						//ç∂ï«
-//	absorbing_nsRL(Ez, 0, LEFT);
+	absorbing_stRL(Hy, 0,	 LEFT);						//ç∂ï«
+	absorbing_nsRL(Hy, 0, LEFT);
 
-	absorbing_nsRL(Hy, mField->getNpx()-2, RIGHT);		//âEï«
-//	absorbing_nsRL(Ez, mField->getNpx() - 2, RIGHT);
+	absorbing_stRL(Hy, mField->getNpx()-2, RIGHT);		//âEï«
+	absorbing_nsRL(Hy, mField->getNpx() - 2, RIGHT);
 
-	absorbing_nsTB(Hx, 0,    BOTTOM);					//â∫ï«
-//	absorbing_nsTB(Ez, 0, BOTTOM);
+	absorbing_stTB(Hx, 0,    BOTTOM);					//â∫ï«
+	absorbing_nsTB(Hx, 0, BOTTOM);
 
-	absorbing_nsTB(Hx, mField->getNpy()-2, TOP);			//è„ï«
-//	absorbing_nsTB(Ez, mField->getNpy() - 2, TOP);
-
-
-	for (int i = 0; i < mField->getNpx() - 1; i++) {
-		HY(i, 0) = 0;
-		HY(i, mField->getNpy() - 1) = 0;
-		EZ(i, 0) = 0;
-		EZ(i, mField->getNpy() - 1) = 0;
-	}
-	for (int j = 0; j < mField->getNpy() - 1; j++) {
-		HX(0, j) = 0;
-		HX(mField->getNpx() - 1, j) = 0;
-		EZ(0, j) = 0;
-		EZ(mField->getNpx() - 1, j) = 0;
-	}
-	EZ(mField->getNpx()-1, mField->getNpy()-1) = 0;
+	absorbing_stTB(Hx, mField->getNpy()-2, TOP);			//è„ï«
+	absorbing_nsTB(Hx, mField->getNpy() - 2, TOP);
 }
 
 /* FieldÇÃåWêîê›íËÇÃïîï™

@@ -15,11 +15,11 @@ FDTD_TM::FDTD_TM()
 :Solver()
 {
 	//領域確保
-	Ez  = new complex<double>[mField->getNcel()];		//Ez(i,j)      → Ez(i,j)
-	Hx  = new complex<double>[mField->getNcel()];		//Hx(i, j+0.5) → Hx(i,j)
-	Hy  = new complex<double>[mField->getNcel()];		//Hy(i+0.5, j) → Hy(i,j) を意味する
-	Ezx = new complex<double>[mField->getNcel()];
-	Ezy = new complex<double>[mField->getNcel()];
+	Ez  = new complex<double>[3*mField->getNcel()];		//Ez(i,j)      → Ez(i,j)
+	Hx  = new complex<double>[3*mField->getNcel()];		//Hx(i, j+0.5) → Hx(i,j)
+	Hy  = new complex<double>[3*mField->getNcel()];		//Hy(i+0.5, j) → Hy(i,j) を意味する
+	Ezx = new complex<double>[3*mField->getNcel()];
+	Ezy = new complex<double>[3*mField->getNcel()];
 
 	//計算用定数配列
 	C_EZ     = new double[mField->getNcel()];	//Cez(i, j)       → CEZ(i,j)
@@ -35,6 +35,8 @@ FDTD_TM::FDTD_TM()
 	C_HY    = new double[mField->getNcel()];
 	C_HXLY  = new double[mField->getNcel()];	//Chxly(i, j+0.5) → CHXLY(i,j)
 	C_HYLX  = new double[mField->getNcel()];	//Chylx(i+0.5, j) → CHYLX(i,j) を意味する
+	C_HXLY_NS = new double[mField->getNcel()];
+	C_HYLX_NS = new double[mField->getNcel()];
 
 	EPS_EZ = new double[mField->getNcel()];
 	EPS_HX = new double[mField->getNcel()];
@@ -50,7 +52,7 @@ FDTD_TM::FDTD_TM()
 	B_HYm = new double[mField->getNcel()];
 
 	//領域初期化
-	for(int i=0; i<mField->getNcel(); i++)
+	for(int i=0; i<3*mField->getNcel(); i++)
 			Ez[i] = Hx[i] = Hy[i] = Ezx[i] = Ezy[i] = 0;
 
 	cout << "FDTD_TM Constructor" << endl;
@@ -70,6 +72,8 @@ FDTD_TM::~FDTD_TM(){
 	delete[] C_EZYLY;
 	delete[] C_HXLY;
 	delete[] C_HYLX;
+	delete[] C_HXLY_NS;
+	delete[] C_HYLX_NS;
 
 	delete[] C_EZ;
 	delete[] C_EZLH;
@@ -93,7 +97,7 @@ FDTD_TM::~FDTD_TM(){
 void FDTD_TM::Initialize(){
 	super::Initialize();
 	//領域初期化
-	for(int i=0; i<mField->getNcel(); i++)
+	for(int i=0; i<3*mField->getNcel(); i++)
 			Ez[i] = Hx[i] = Hy[i] = Ezx[i] = Ezy[i] = 0;
 }
 
@@ -141,9 +145,9 @@ void FDTD_TM::NsScatteredWave(int ang){
 			double u1 = sin(w_s/n*DT_S/2.0) / sin(n*k_s*H_S/2.0);
 			double _n = u0/u1;
 			double ikx = i*_cos + j*_sin;		//k_s*(i*cos + j*sin)
-			EZX(i,j) += 0.5*ray_coef*(1.0/(_n*n) - 1)*(polar(1.0, ikx - w_s*(time+DT_S)) - polar(1.0, ikx - w_s*time));
-			EZY(i,j) += 0.5*ray_coef*(1.0/(_n*n) - 1)*(polar(1.0, ikx - w_s*(time+DT_S)) - polar(1.0, ikx - w_s*time)); 
-			EZ(i, j) += ray_coef*(1.0/(_n*n) - 1)*(polar(1.0, ikx - w_s*(time+DT_S)) - polar(1.0, ikx - w_s*time));
+			EZX(i,j,+1) += 0.5*ray_coef*(1.0/(_n*n) - 1)*(polar(1.0, ikx - w_s*(time+DT_S)) - polar(1.0, ikx - w_s*time));
+			EZY(i,j,+1) += 0.5*ray_coef*(1.0/(_n*n) - 1)*(polar(1.0, ikx - w_s*(time+DT_S)) - polar(1.0, ikx - w_s*time)); 
+			EZ(i, j,+1) += ray_coef*(1.0/(_n*n) - 1)*(polar(1.0, ikx - w_s*(time+DT_S)) - polar(1.0, ikx - w_s*time));
 		}
 	}
 }

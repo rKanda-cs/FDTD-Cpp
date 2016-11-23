@@ -7,7 +7,7 @@ class Field{
 private:
 	const int WIDTH;	//横幅[nm]
 	const int HEIGHT;	//縦幅[nm]
-	const int H_U;		//1セルの大きさ[nm]
+	const double H_U;		//1セルの大きさ[nm]
 	const int H_S;		//セル間隔(わかりやすいように1にしてある)
 	const int N_X;		//横の配列数
 	const int N_Y;		//縦の配列数
@@ -16,7 +16,7 @@ private:
 	const int N_PY;		//PMLレイヤを含めた縦の配列数
 	const int N_CELL;	//総セル数
 public:
-	Field(int width, int height, int h_u, int pml);
+	Field(int width, int height, double h_u, int pml);
 
 	//計算領域にしかアクセスできないインデックス関数(負の数をしていすればいける)
 	int index(const int& i, const int& j){

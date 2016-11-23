@@ -17,7 +17,7 @@ class FDTD_TM: public Solver{
 protected:
 	Complex *Ez, *Hx, *Hy;
 	Complex *Ezx, *Ezy; //pml用
-	double *C_EZ, *C_EZLH, *C_HXLY, *C_HYLX;
+	double *C_EZ, *C_EZLH, *C_HXLY, *C_HYLX, *C_HXLY_NS, *C_HYLX_NS;
 	double *C_EZX, *C_EZY, *C_EZXLX, *C_EZYLY;
 	double *C_HX, *C_HY;
 	double *EPS_EZ, *EPS_HX, *EPS_HY;
@@ -44,107 +44,135 @@ protected:
 	void IncidentWaveH(int angle);
 
 	//ゲッター(インライン化することでオーバーヘッド削減, なるか知らんけど)
-	Complex& EZ(const int &i, const int &j, const int &t = 1){
-		return Ez[index(i,j)];
+	Complex& EZ(const int &i, const int &j, const int &t){
+		return Ez[pmlIndex(i,j,t)];
 	};
 
-	Complex& HX(const int &i, const int &j, const int &t = 1){
-		return Hx[index(i,j)];
+	Complex& HX(const int &i, const int &j, const int &t){
+		return Hx[pmlIndex(i,j,t)];
 	};
 
-	Complex& HY(const int &i, const int &j, const int &t = 1){
-		return Hy[index(i,j)];
+	Complex& HY(const int &i, const int &j, const int &t){
+		return Hy[pmlIndex(i,j,t)];
 	};
 
-	Complex& EZX(const int &i, const int &j){
-		return Ezx[index(i,j)];
+	Complex& EZX(const int &i, const int &j, const int &t){
+		return Ezx[pmlIndex(i,j,t)];
 	}
 	
-	Complex& EZY(const int &i, const int &j){
-		return Ezy[index(i,j)];
+	Complex& EZY(const int &i, const int &j, const int &t){
+		return Ezy[pmlIndex(i,j,t)];
+	}
+
+	Complex& EZ(const int &i, const int &j) {
+		return Ez[pmlIndex(i, j)];
+	};
+
+	Complex& HX(const int &i, const int &j) {
+		return Hx[pmlIndex(i, j)];
+	};
+
+	Complex& HY(const int &i, const int &j) {
+		return Hy[pmlIndex(i, j)];
+	};
+
+	Complex& EZX(const int &i, const int &j) {
+		return Ezx[pmlIndex(i, j)];
+	}
+
+	Complex& EZY(const int &i, const int &j) {
+		return Ezy[pmlIndex(i, j)];
 	}
 
 	double& CEZX(const int &i, const int &j){
-		return C_EZX[index(i,j)];
+		return C_EZX[pmlIndex(i,j)];
 	}
 
 	double& CEZY(const int &i, const int &j){
-		return C_EZY[index(i,j)];
+		return C_EZY[pmlIndex(i,j)];
 	}
 
 	double& CEZXLX(const int &i, const int &j){
-		return C_EZXLX[index(i,j)];
+		return C_EZXLX[pmlIndex(i,j)];
 	}
 
 	double& CEZYLY(const int &i, const int &j){
-		return C_EZYLY[index(i,j)];
+		return C_EZYLY[pmlIndex(i,j)];
 	}
 
 	double& CEZ(const int &i, const int &j){
-		return C_EZ[index(i,j)];
+		return C_EZ[pmlIndex(i,j)];
 	};
 
 	double& CEZLH(const int &i, const int &j){
-		return C_EZLH[index(i,j)];
+		return C_EZLH[pmlIndex(i,j)];
 	};
 
 	double& CHXLY(const int &i, const int &j){
-		return C_HXLY[index(i,j)];
+		return C_HXLY[pmlIndex(i,j)];
 	};
 
 	double& CHYLX(const int &i, const int &j){
-		return C_HYLX[index(i,j)];
+		return C_HYLX[pmlIndex(i,j)];
+	};
+
+	double& CHXLYNS(const int &i, const int &j) {
+		return C_HXLY_NS[pmlIndex(i, j)];
+	};
+
+	double& CHYLXNS(const int &i, const int &j) {
+		return C_HYLX_NS[pmlIndex(i, j)];
 	};
 	
 	double& CHX(const int &i, const int &j){
-		return C_HX[index(i,j)];
+		return C_HX[pmlIndex(i,j)];
 	};
 
 	double& CHY(const int &i, const int &j){
-		return C_HY[index(i,j)];
+		return C_HY[pmlIndex(i,j)];
 	};
 	double& EPSEZ(const int &i, const int &j){
-		return EPS_EZ[index(i,j)];
+		return EPS_EZ[pmlIndex(i,j)];
 	};
 
 	double& EPSHX(const int &i, const int &j){
-		return EPS_HX[index(i,j)];
+		return EPS_HX[pmlIndex(i,j)];
 	};
 
 	double& EPSHY(const int &i, const int &j){
-		return EPS_HY[index(i,j)];
+		return EPS_HY[pmlIndex(i,j)];
 	};
 
 	double& BEZXP(const int &i, const int &j) {
-		return B_EZXp[index(i, j)];
+		return B_EZXp[pmlIndex(i, j)];
 	};
 
 	double& BEZXM(const int &i, const int &j) {
-		return B_EZXm[index(i, j)];
+		return B_EZXm[pmlIndex(i, j)];
 	};
 
 	double& BEZYP(const int &i, const int &j) {
-		return B_EZYp[index(i, j)];
+		return B_EZYp[pmlIndex(i, j)];
 	};
 
 	double& BEZYM(const int &i, const int &j) {
-		return B_EZYm[index(i, j)];
+		return B_EZYm[pmlIndex(i, j)];
 	};
 
 	double& BHXP(const int &i, const int &j) {
-		return B_HXp[index(i, j)];
+		return B_HXp[pmlIndex(i, j)];
 	};
 
 	double& BHXM(const int &i, const int &j) {
-		return B_HXm[index(i, j)];
+		return B_HXm[pmlIndex(i, j)];
 	};
 
 	double& BHYP(const int &i, const int &j) {
-		return B_HYp[index(i, j)];
+		return B_HYp[pmlIndex(i, j)];
 	};
 
 	double& BHYM(const int &i, const int &j) {
-		return B_HYm[index(i, j)];
+		return B_HYm[pmlIndex(i, j)];
 	};
 
 	complex<double> EZ_NTF(const int &i, const int &j){

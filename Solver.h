@@ -142,7 +142,7 @@ protected:
 	}
 
 	bool Terminate(){
-		return false; //¡‚Íí‚ÉI—¹
+//		return false; //¡‚Íí‚ÉI—¹
 
 		if( !nextLambda()){
 			if(!nextWaveAngle()){

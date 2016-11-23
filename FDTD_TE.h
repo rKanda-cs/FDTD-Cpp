@@ -38,6 +38,14 @@ public:
 		return Hz[pmlIndex(i,j, t)];
 	};
 
+	complex<double>& HZX(const int &i, const int &j, const int &t){
+		return Hzx[pmlIndex(i, j, t)];
+	};
+
+	complex<double>& HZY(const int &i, const int &j, const int &t){
+		return Hzy[pmlIndex(i, j, t)];
+	};
+
 	complex<double>& EX(const int &i, const int &j){
 		return Ex[pmlIndex(i,j)];
 	};

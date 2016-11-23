@@ -16,8 +16,8 @@
 Solver::Solver()
 	:H_S(1.0), DT_S(1.0)
 {
-	mField = new Field(200, 200, 1, 5); //width, height, ƒ¢h, Npml
-	LambdaRange    = Range<double>(Nano_S(60), Nano_S(700), Nano_S(5));
+	mField = new Field(1500, 300, 10, 20); //width, height, ƒ¢h, Npml
+	LambdaRange    = Range<double>(Nano_S(380), Nano_S(700), Nano_S(5));
 	WaveAngleRange = Range<int>   (0, 90, 10);
 
 	SetWaveParameter( LambdaRange.MIN() );
@@ -27,8 +27,8 @@ Solver::Solver()
 	maxStep  = 3000;
 
 	n_s      = new double[mField->getNcel()];	//‹üÜ—¦
-	//mModel    = new FazzySlabModel(mField);
-	mModel	 = new FazzyMieModel(mField, lambda_s);
+	mModel    = new FazzySlabModel(mField);
+	//mModel	 = new FazzyMieModel(mField, lambda_s);
 	//mModel	 = new FazzyMorphoModel(mField, 150, 55, NONSHELF);
 	//mModel	 = new FazzyNoModel(mField);
 	DataDir		=  "../DataSet/";
@@ -141,9 +141,9 @@ bool Solver::neighber(int _x, int _y){
 //------------------------------------------//
 void Solver::absorbing_stRL(complex<double> *p, int X, enum DIRECT offset){
 	double u;
-	for(int j=1; j<mField->getNy()-1; j++){
+	for(int j=1; j<mField->getNpy()-1; j++){
 		u = LIGHT_SPEED_S*DT_S/n_s[index(X,j)];
-		if(j == 1 || j == mField->getNy()-2)		// l‹÷‚Ì‰¡‚ÍˆêŸŒ³‹zû‹«ŠE
+		if(j == 1 || j == mField->getNpy()-2)		// l‹÷‚Ì‰¡‚ÍˆêŸŒ³‹zû‹«ŠE
 			p[index(X,j, +1)] = p[index(X+offset,j, 0)] + (1- u)/(1+u)*(p[index(X,j, 0)] - p[index(X+offset,j, +1)]);
 
 		else						//‚»‚êˆÈŠO‚Í“ñŸŒ³‹zû‹«ŠE
@@ -157,10 +157,10 @@ void Solver::absorbing_stRL(complex<double> *p, int X, enum DIRECT offset){
 
 void Solver::absorbing_stTB(complex<double> *p, int Y, enum DIRECT offset){
 	double u;
-	for(int i=1; i<mField->getNx()-1; i++){
+	for(int i=1; i<mField->getNpx()-1; i++){
 		u = LIGHT_SPEED_S*DT_S/n_s[index(i,Y)];
 
-		if(i==1 || i==mField->getNx()-2)	//l‹÷‚Ì‰¡‚ÍˆêŸŒ³‹zû‹«ŠE
+		if(i==1 || i==mField->getNpx()-2)	//l‹÷‚Ì‰¡‚ÍˆêŸŒ³‹zû‹«ŠE
 			p[index(i,Y, +1)]    = p[index(i,Y+offset, 0)]    + (1- u)/(1+u)*(p[index(i,Y, 0)]    - p[index(i,Y+offset, +1)]);
 
 		else				//“ñŸŒ³‹zû‹«ŠE

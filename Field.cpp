@@ -1,6 +1,6 @@
 #include"Field.h"
 
-Field::Field(int width, int height, int h_u, int pml)
+Field::Field(int width, int height, double h_u, int pml)
 :WIDTH(width),
 HEIGHT(height),
 H_U(h_u),

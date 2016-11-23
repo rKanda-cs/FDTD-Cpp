@@ -62,8 +62,8 @@ bool StFDTD_TM::calc(){
 	}
 	*/
 	
-	if (time > 3000) {
-		MiePrint(Ez, "time3000_PML5");
+	if (time > maxStep) {
+		MiePrint(Ez, "time" + to_s(maxStep) + "_PML" + to_s(mField->getNpml()));
 		capture();
 		return EndTask();
 	}

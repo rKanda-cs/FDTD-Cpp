@@ -9,11 +9,11 @@ FDTD_TE::FDTD_TE()
 :Solver()
 {
 	cout << "FDTD_TE Constructor" << endl;
-	Hz  = new complex<double>[mField->getNcel()];		//Hz(i+0.5, j+0.5) → Hz(i,j)を意味する 領域確保
-	Ex  = new complex<double>[mField->getNcel()];		//Ex(i+0.5,j) → Ex(i,j)を意味する
-	Ey  = new complex<double>[mField->getNcel()];		//Ey(i,j+0.5) → Ey(i,j)を意味する
-	Hzx= new complex<double>[mField->getNcel()];		//Ey(i,j+0.5) → Ey(i,j)を意味する
-	Hzy= new complex<double>[mField->getNcel()];		//Ey(i,j+0.5) → Ey(i,j)を意味する
+	Hz  = new complex<double>[3*mField->getNcel()];		//Hz(i+0.5, j+0.5) → Hz(i,j)を意味する 領域確保
+	Ex  = new complex<double>[3*mField->getNcel()];		//Ex(i+0.5,j) → Ex(i,j)を意味する
+	Ey  = new complex<double>[3*mField->getNcel()];		//Ey(i,j+0.5) → Ey(i,j)を意味する
+	Hzx	= new complex<double>[3*mField->getNcel()];		//Ey(i,j+0.5) → Ey(i,j)を意味する
+	Hzy	= new complex<double>[3*mField->getNcel()];		//Ey(i,j+0.5) → Ey(i,j)を意味する
 
 //計算用定数配列
 	C_HZLH  = new double[mField->getNcel()];	//CHzlh(i+0.5, j+0.5) → CHZLH(i,j)
@@ -31,7 +31,7 @@ FDTD_TE::FDTD_TE()
 
 
 	//初期化
-	for(int i=0; i<mField->getNcel(); i++)
+	for(int i=0; i<3*mField->getNcel(); i++)
 		Ex[i] = Ey[i] = Hz[i] = Hzx[i] = Hzy[i] = 0;
 
 	//todo 定数は初期化しなくていい?
@@ -88,7 +88,7 @@ void FDTD_TE::Initialize(){
 	super::Initialize();
 	//領域初期化
 	for(int i=0; i<3*mField->getNcel(); i++)
-			Ex[i] = Ey[i] = Hz[i] = 0;
+			Ex[i] = Ey[i] = Hz[i] = Hzx[i] = Hzy[i] = 0;
 }
 
 void FDTD_TE::field(){
