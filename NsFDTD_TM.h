@@ -22,12 +22,12 @@ private:
 	}
 
 	complex<double> Dx0_n(complex<double> *p, int i, int j, int t) {	//ç∑ï™ââéZéqd'0ÇÃê¨ï™
-		complex<double> dx = p[index(i, j, t)] - p[index(i - 1, j, t)];
+		complex<double> dx = p[index(i+1, j, t)] - p[index(i, j, t)];
 		return (dx + R_M/2 * DxDy2(p, i, j, 0));
 	};
 
 	complex<double> Dy0_n(complex<double> *p, int i, int j, int t) {
-		complex<double> dy = p[index(i, j, t)] - p[index(i, j - 1, t)];
+		complex<double> dy = p[index(i, j+1, t)] - p[index(i, j, t)];
 		return (dy + R_M/2 * DxDy2(p, i, j, 0));
 	};
 
@@ -40,7 +40,7 @@ private:
 		for (int i = 1; i < mField->getNpx() - 1; i++) {
 			for (int j = 1; j < mField->getNpy() - 1; j++) {
 				if(i == 1 || i == mField->getNpx()-2 || j == 1 || j == mField->getNpy()-2)
-					EZ(i, j) = 1.0*EZ(i, j) + 1/EPSEZ(i, j)*(HY(i, j) - HY(i - 1, j) - ( HX(i, j) - HX(i, j - 1) ));	//StFDTD
+					EZ(i, j, +1) = 1.0*EZ(i, j, 0) + 1/EPSEZ(i, j)*(HY(i, j, 0) - HY(i - 1, j, 0) - ( HX(i, j, 0) - HX(i, j - 1, 0) ));	//StFDTD
 				else
 					EZ(i, j, +1) = CEZ(i, j)*EZ(i, j, 0)
 					+ CEZLH(i, j)*(R_P*(HY(i, j, 0) - HY(i - 1, j, 0) - (HX(i, j, 0) - HX(i, j - 1, 0)))	//dx(Hy) - dy(Hy)
@@ -62,7 +62,7 @@ private:
 		#endif
 		for(int i=1; i<mField->getNpx()-1; i++){
 			for(int j=0; j<mField->getNpy()-1; j++){
-				HX(i, j, +1) = HX(i, j, 0) - CHXLY(i, j)*(EZ(i, j + 1, +1) - EZ(i, j, +1));	//HxÇÃåvéZ Hx(i, j+1/2) -> Hx[i,j]
+				HX(i, j, +1) = HX(i, j, 0) - CHXLYNS(i, j)*(EZ(i, j + 1, +1) - EZ(i, j, +1));	//HxÇÃåvéZ Hx(i, j+1/2) -> Hx[i,j]
 			}
 		}
 				
@@ -71,7 +71,7 @@ private:
 		#endif
 		for(int i=0; i<mField->getNpx()-1; i++){
 			for(int j=1; j<mField->getNpy()-1; j++){
-				HY(i, j, +1) = HY(i, j, 0) + CHYLX(i, j)*(EZ(i + 1, j, +1) - EZ(i, j, +1));	//HyÇÃåvéZ Hy(i+1/2, j) -> Hy[i,j]
+				HY(i, j, +1) = HY(i, j, 0) + CHYLXNS(i, j)*(EZ(i + 1, j, +1) - EZ(i, j, +1));	//HyÇÃåvéZ Hy(i+1/2, j) -> Hy[i,j]
 			}
 		}
 			
@@ -81,8 +81,6 @@ private:
 	void absorbing();	//ãzé˚ã´äE
 
 	// Ns_PML
-	//ñ¢äÆê¨
-
 	void CalcE_PML(){		
 	#ifdef _OPENMP
 	#pragma omp parallel
@@ -93,12 +91,9 @@ private:
 		#endif
 			for (int i = 1; i < mField->getNpx() - 1; i++) {
 				for (int j = 1; j < mField->getNpy() - 1; j++) {
-					if (i == 1 || i == mField->getNpx() - 2 || j == 1 || j == mField->getNpy() - 2)
-						EZX(i, j) = CEZX(i, j)*EZX(i, j) + CEZXLX(i, j)*(HY(i, j) - HY(i - 1, j));	//StFDTD
-					else
-						EZX(i, j) = BEZXP(i, j)*BEZXM(i, j)*EZX(i, j)
-						+ BEZXP(i, j)*CEZLH(i, j)*(R_P*(HY(i, j, 0) - HY(i - 1, j, 0)) + R_M*Dx2_n(Hy, i, j, 0));
-												 //*Dx0_n(Hy, i, j, 0);
+					EZX(i, j, +1) = BEZXP(i, j)*BEZXM(i, j)*EZX(i, j, 0)
+						+ BEZXP(i, j)*CEZLH(i, j)*//(R_P*(HY(i, j, 0) - HY(i - 1, j, 0)) + R_M*Dx2_n(Hy, i, j, 0));
+					(HY(i, j, 0) - HY(i - 1, j, 0));
 				}
 			}
 
@@ -107,12 +102,9 @@ private:
 		#endif
 			for (int i = 1; i < mField->getNpx() - 1; i++) {
 				for (int j = 1; j < mField->getNpy() - 1; j++) {
-					if (i == 1 || i == mField->getNpx() - 2 || j == 1 || j == mField->getNpy() - 2)
-						EZY(i, j) = CEZY(i, j)*EZY(i, j) - CEZYLY(i, j)*(HX(i, j) - HX(i, j - 1));	//StFDTD
-					else
-						EZY(i, j) = BEZYP(i, j)*BEZYM(i, j)*EZY(i, j)
-						- BEZYP(i, j)*CEZLH(i, j)*(R_P*(HX(i, j, 0) - HX(i, j - 1, 0)) + R_M*Dy2_n(Hx, i, j, 0));
-												 //*Dy0_n(Hx, i, j, 0);
+					EZY(i, j, +1) = BEZYP(i, j)*BEZYM(i, j)*EZY(i, j, 0)
+						- BEZYP(i, j)*CEZLH(i, j)*//(R_P*(HX(i, j, 0) - HX(i, j - 1, 0)) + R_M*Dy2_n(Hx, i, j, 0));
+					(HX(i, j, 0) - HX(i, j - 1, 0));
 				}
 			}
 
@@ -121,17 +113,11 @@ private:
 		#endif
 			for (int i = 1; i < mField->getNpx() - 1; i++)
 				for (int j = 1; j < mField->getNpy() - 1; j++)
-/*					if(mField->sigmaX(i,j) == 0 && mField->sigmaY(i,j) == 0)
-						EZ(i, j, +1) = CEZ(i, j)*EZ(i, j, 0)
-						+ CEZLH(i, j)*(R_P*(HY(i, j, 0) - HY(i - 1, j, 0) - (HX(i, j, 0) - HX(i, j - 1, 0)))	//dx(Hy) - dy(Hy)
-							+ R_M*(Dx2_n(Hy, i, j, 0) - Dy2_n(Hx, i, j, 0))
-							);
-					else
-*/					EZ(i, j) = EZX(i, j) + EZY(i, j);
+					EZ(i, j, +1) = EZX(i, j, +1) + EZY(i, j, +1);
 		}
 	}
 
-	void CalcH_PML(){
+	void CalcH_PML(){	//àÍïîEz=0ÇéQè∆ÇµÇƒÇ¢ÇÈÇ™ÅAîzóÒíËã`äOéQè∆ÇÕÇ»Ç¢Ç©ÇÁStÇÕégÇÌÇ»Ç≠ÇƒÇ¢Ç¢ÅH
 	#ifdef _OPENMP
 	#pragma omp parallel
 	#endif
@@ -139,19 +125,29 @@ private:
 		#ifdef _OPENMP
 		#pragma omp for
 		#endif
-			for (int i = 0; i<mField->getNpx(); i++) {
+			for (int i = 1; i<mField->getNpx()-1; i++) {
 				for (int j = 0; j<mField->getNpy() - 1; j++) {
-					HX(i, j, +1) = BHYP(i, j) * BHYM(i, j) * HX(i, j, 0) - BHYP(i, j)*CHXLY(i, j)*(EZ(i, j + 1, +1) - EZ(i, j, +1));	//HxÇÃåvéZ Hx(i, j+1/2) -> Hx[i,j]
-				}																														//dyEz = Ez(i, j+1) - Ez(i, j)
+					if (i == 1 || i == mField->getNpx() - 2 || j == 0 || j == mField->getNpy() - 2)
+						HX(i, j, +1) = CHX(i, j)*HX(i, j, 0)
+						- CHXLY(i, j)*(EZX(i, j + 1, +1) - EZX(i, j, +1) + EZY(i, j + 1, +1) - EZY(i, j, +1));
+					else
+						HX(i, j, +1) = BHYP(i, j) * BHYM(i, j) * HX(i, j, 0) - BHYP(i, j)*CHXLYNS(i, j)*(R_P*(EZ(i, j+1, +1) - EZ(i, j, +1)) + R_M*Dy2_n(Ez, i, j+1, +1));	//HxÇÃåvéZ Hx(i, j+1/2) -> Hx[i,j]
+																									   //*Dy0_n(Ez, i, j, +1);
+				}
 			}
 
 		#ifdef _OPENMP
 		#pragma omp for
 		#endif
 			for (int i = 0; i<mField->getNpx() - 1; i++) {
-				for (int j = 0; j<mField->getNpy(); j++) {
-					HY(i, j, +1) = BHXP(i, j) * BHXM(i, j) * HY(i, j, 0) + BHXP(i, j)*CHYLX(i, j)*(EZ(i + 1, j, +1) - EZ(i, j, +1));	//HyÇÃåvéZ Hy(i+1/2, j) -> Hy[i,j]
-				}																														//dxEz = Ez(i+1, j) - Ez(i, j)
+				for (int j = 1; j<mField->getNpy()-1; j++) {
+					if (j == 1 || i == mField->getNpy() - 2 || i==0 || i==mField->getNpx()-2)
+						HY(i, j, +1) = CHY(i, j)*HY(i, j, 0)
+						+ CHYLX(i, j)*(EZX(i + 1, j, +1) - EZX(i, j, +1) + EZY(i + 1, j, +1) - EZY(i, j, +1));
+					else
+						HY(i, j, +1) = BHXP(i, j) * BHXM(i, j) * HY(i, j, 0) + BHXP(i, j)*CHYLXNS(i, j)*(R_P*(EZ(i+1, j, +1) - EZ(i, j, +1)) + R_M*Dx2_n(Ez, i+1, j, +1));	//HyÇÃåvéZ Hy(i+1/2, j) -> Hy[i,j]
+																									   //*Dx0_n(Ez, i, j, +1);
+				}
 			}
 
 		}
