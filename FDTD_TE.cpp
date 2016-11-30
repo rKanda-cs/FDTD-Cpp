@@ -25,10 +25,19 @@ FDTD_TE::FDTD_TE()
 	C_HZY   = new double[mField->getNcel()];
 	C_HZXLX = new double[mField->getNcel()];
 	C_HZYLY = new double[mField->getNcel()];
+
 	EPS_HZ  = new double[mField->getNcel()];
 	EPS_EX  = new double[mField->getNcel()];
 	EPS_EY  = new double[mField->getNcel()];
 
+	B_EXp = new double[mField->getNcel()];
+	B_EXm = new double[mField->getNcel()];
+	B_EYp = new double[mField->getNcel()];
+	B_EYm = new double[mField->getNcel()];
+	B_HZXp = new double[mField->getNcel()];
+	B_HZXm = new double[mField->getNcel()];
+	B_HZYp = new double[mField->getNcel()];
+	B_HZYm = new double[mField->getNcel()];
 
 	//初期化
 	for(int i=0; i<3*mField->getNcel(); i++)
@@ -58,6 +67,15 @@ FDTD_TE::~FDTD_TE(){
 	delete[] EPS_HZ;
 	delete[] EPS_EX;
 	delete[] EPS_EY;
+
+	delete[] B_EXp;
+	delete[] B_EXm;
+	delete[] B_EYp;
+	delete[] B_EYm;
+	delete[] B_HZXp;
+	delete[] B_HZXm;
+	delete[] B_HZYp;
+	delete[] B_HZYm;
 
 	cout << "FDTD_TE Destructor" << endl;
 }
@@ -112,8 +130,8 @@ void FDTD_TE::NsScatteredWave(int ang){
 	//double a = (1-exp(-_pow(0.01*time,2)));		//不連続に入射されるのを防ぐ為の係数
 	double a = ray_coef;
 	double n, u0, u1, _n;
-	for(int i=0; i<mField->getNx(); i++){
-		for(int j=0; j<mField->getNy(); j++){
+	for(int i=mField->getNpml(); i<mField->getNpx() - mField->getNpml(); i++){
+		for(int j=mField->getNpml(); j<mField->getNpy() - mField->getNpml(); j++){
 			if(EPSEY(i,j) == EPSILON_0_S && EPSEX(i,j) == EPSILON_0_S) continue;
 			double ikx = k_s*(i*_cos + j*_sin);
 
@@ -161,8 +179,8 @@ void FDTD_TE::IncidentWaveH(int ang){
 void FDTD_TE::NTFFindexform(string label, NTFF::output flag){
 	cout << "NTF start" << endl;
 
-	int cx = mField->getNx()/2;
-	int cy = mField->getNy()/2;
+	int cx = mField->getNpx()/2;
+	int cy = mField->getNpy()/2;
 
 	double r0 = 1.0e6;
     complex<double> iu( 0.0, 1.0 );											// imaginary unit
@@ -170,17 +188,17 @@ void FDTD_TE::NTFFindexform(string label, NTFF::output flag){
 
     int offset = 5;		    // closed line offset
 	int lt,rt, tp, bm;		//閉曲面の場所
-	tp = mField->getNy()-offset;			//上から-5
-	bm = offset;			//下から5
-	rt = mField->getNx() - offset;		//右から-5
-	lt  = offset;			//左から5
+	tp = mField->getNy() - mField->getNpml() - offset;			//上から-5
+	bm = mField->getNpml() + offset;			//下から5
+	rt = mField->getNx() - mField->getNpml() - offset;		//右から-5
+	lt = mField->getNpml() + offset;			//左から5
 
 	double sum = 0;
 	const int max_angle = 360;	//どの角度まで分布を求めるか, 180か360
-	  double strength[max_angle];
+	double strength[max_angle];
     for ( int phi=0; phi<max_angle; phi++ ) {
-        double rad = phi * M_PI/180.0;
-		rad = M_PI - rad;							//todo なぜかTEは180°ずらす
+        double rad = (phi-90) * M_PI/180.0;
+//		rad = M_PI - rad;							//todo なぜかTEは180°ずらす
         Vec2<double> r( cos(rad), sin(rad) );	        // eye vector
           
         complex<double> Nx( 0, 0 );

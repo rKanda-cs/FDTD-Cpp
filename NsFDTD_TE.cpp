@@ -14,17 +14,21 @@ NsFDTD_TE::~NsFDTD_TE(){
 bool NsFDTD_TE::calc(){	
 
 	CalcE();	//ìdäEÇÃåvéZ
+	CalcE_PML();
 
 	NsScatteredWave(wave_angle);
-	absorbing();
+	//absorbing();
 
 	CalcH();		//é•äEÇÃåvéZ Hz(i+1/2, j+1/2) -> Hz[i,j]
+	CalcH_PML();
 
-	pointLightSource(Hz);
+	//pointLightSource(Hz);
 
-	if(time > maxStep)
+	if (time > maxStep) {
+		MiePrint(Ey, "time" + to_s(maxStep) + "_PML" + to_s(mField->getNpml()) + "_NsTE_");
+		capture();
 		return EndTask();
-	
+	}
 	return true;
 };
 
@@ -71,6 +75,51 @@ void NsFDTD_TE::field(){
 		}
 	}
 	cout << "Ns_TE_field" << endl;
+
+	PMLfield();
+}
+
+void NsFDTD_TE::PMLfield() {
+	double mu = MU_0_S;
+
+	for (int i = 0; i < mField->getNpx(); i++) {
+		for (int j = 0; j < mField->getNpy(); j++) {
+			double sig_x = mField->sigmaX(i, j);			//É–x, É–x*, É–y, É–y* Å@Å@<- B-PMLÇÃåWêî
+			double sig_xx = mu / EPSILON_0_S * sig_x;
+			double sig_y = mField->sigmaY(i, j);
+			double sig_yy = mu / EPSILON_0_S * sig_y;
+
+			double ax = sig_x * DT_S / (2 * EPSEX(i, j));
+			double ay = sig_y * DT_S / (2 * EPSEY(i, j));
+			double axx = sig_xx * DT_S / (2 * mu);
+			double ayy = sig_yy * DT_S / (2 * mu);
+			
+			/*
+			BEZXP(i, j) = 1 + tanh(ax);
+			BEZXM(i, j) = 1 - tanh(ax);
+			BEZYP(i, j) = 1 + tanh(ay);
+			BEZYM(i, j) = 1 - tanh(ay);
+			BHXP(i, j) = 1 + tanh(axx);
+			BHXM(i, j) = 1 - tanh(axx);
+			BHYP(i, j) = 1 + tanh(ayy);
+			BHYM(i, j) = 1 - tanh(ayy);
+			*/
+			BEXP(i, j) = 1 + (tanh(ax) / (1 + tanh(ax)*tanh(axx)));
+			BEXM(i, j) = 1 - (tanh(ax) / (1 + tanh(ax)*tanh(axx)));
+			BEYP(i, j) = 1 + (tanh(ay) / (1 + tanh(ay)*tanh(ayy)));
+			BEYM(i, j) = 1 - (tanh(ay) / (1 + tanh(ay)*tanh(ayy)));
+			BHZXP(i, j) = 1 + (tanh(axx) / (1 + tanh(ax)*tanh(axx)));
+			BHZXM(i, j) = 1 - (tanh(axx) / (1 + tanh(ax)*tanh(axx)));
+			BHZYP(i, j) = 1 + (tanh(ayy) / (1 + tanh(ay)*tanh(ayy)));
+			BHZYM(i, j) = 1 - (tanh(ayy) / (1 + tanh(ay)*tanh(ayy)));
+
+			BEXP(i, j) = 1 / BEXP(i, j);
+			BEYP(i, j) = 1 / BEYP(i, j);
+			BHZXP(i, j) = 1 / BHZXP(i, j);
+			BHZYP(i, j) = 1 / BHZYP(i, j);
+		}
+	}
+	cout << "PML_field" << endl;
 }
 
 void NsFDTD_TE::absorbing(){

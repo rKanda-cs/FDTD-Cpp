@@ -63,7 +63,7 @@ bool StFDTD_TM::calc(){
 	*/
 	
 	if (time > maxStep) {
-		MiePrint(Ez, "time" + to_s(maxStep) + "_PML" + to_s(mField->getNpml()));
+		MiePrint(Ez, "time" + to_s(maxStep) + "_PML" + to_s(mField->getNpml()) + "_StTM_");
 		capture();
 		return EndTask();
 	}

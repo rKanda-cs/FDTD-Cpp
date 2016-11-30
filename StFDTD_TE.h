@@ -23,17 +23,17 @@ private:
     #endif
 		//“dŠE‚ÌŒvŽZEx
 		for(int i=1; i<mField->getNpx()-1; i++)
-			for(int j=1; j<mField->getNpy()-1; j++)
-				EX(i,j) = CEX(i,j)*EX(i,j) 
-						+ CEXLY(i,j)*( HZX(i,j+1) - HZX(i,j) + HZY(i,j+1) - HZY(i,j) );
+			for(int j=0; j<mField->getNpy()-1; j++)
+				EX(i, j, +1) = CEX(i,j)*EX(i, j, 0) 
+						+ CEXLY(i,j)*( HZX(i, j+1, 0) - HZX(i, j, 0) + HZY(i, j+1, 0) - HZY(i, j, 0) );
     #ifdef _OPENMP
     #pragma omp for
     #endif
 		//“dŠE‚ÌŒvŽZEy
-		for(int i=1; i<mField->getNpx()-1; i++)
+		for(int i=0; i<mField->getNpx()-1; i++)
 			for(int j=1; j<mField->getNpy()-1; j++)
-				EY(i,j) = CEY(i,j)*EY(i,j)
-					    - CEYLX(i,j)*( HZX(i+1,j)-HZX(i,j) + HZY(i+1,j)-HZY(i,j) );
+				EY(i, j, +1) = CEY(i,j)*EY(i, j, 0)
+					    - CEYLX(i,j)*( HZX(i+1, j, 0)-HZX(i, j, 0) + HZY(i+1, j, 0)-HZY(i, j, 0) );
 }
 	}
 
@@ -48,13 +48,13 @@ private:
     #endif
 		for(int i=1; i<mField->getNpx()-1; i++)
 			for(int j=1; j<mField->getNpy()-1; j++)
-				HZX(i,j) = CHZX(i,j)*HZX(i,j) - CHZXLX(i,j)*(EY(i,j)-EY(i-1,j) );
+				HZX(i, j, +1) = CHZX(i,j)*HZX(i, j, 0) - CHZXLX(i,j)*(EY(i, j, +1)-EY(i-1, j, +1) );
     #ifdef _OPENMP
     #pragma omp for
     #endif
 		for(int i=1; i<mField->getNpx()-1; i++)
 			for(int j=1; j<mField->getNpy()-1; j++)
-				HZY(i,j) = CHZY(i,j)*HZY(i,j) + CHZYLY(i,j)*(EX(i,j)-EX(i,j-1) );
+				HZY(i, j, +1) = CHZY(i,j)*HZY(i, j, 0) + CHZYLY(i,j)*(EX(i, j, +1)-EX(i, j-1, +1) );
 }
 
 	}

@@ -18,13 +18,12 @@ bool StFDTD_TE::calc(){
 	//pointLightSource(Ey);
 	NsScatteredWave(wave_angle);
 	//scatteredWave(Ey, EPS_EY);
-	//scatteredWave(Ey);
 
 	//absorbing();
 	CalcH();
 
-	if(time > 3000){						//time•ÏX
-		MiePrint(Ey, "time3000_TE_PML5");
+	if(time > maxStep){						//time•ÏX
+		MiePrint(Ey, "time" + to_s(maxStep) + "_PML" + to_s(mField->getNpml()) + "_StTE_");
 		capture();
 		return false;
 	}

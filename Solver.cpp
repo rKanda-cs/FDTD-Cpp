@@ -16,19 +16,19 @@
 Solver::Solver()
 	:H_S(1.0), DT_S(1.0)
 {
-	mField = new Field(1500, 300, 10, 20); //width, height, É¢h, Npml
-	LambdaRange    = Range<double>(Nano_S(380), Nano_S(700), Nano_S(5));
+	mField = new Field(200, 200, 1, 8); //width, height, É¢h, Npml
+	LambdaRange    = Range<double>(Nano_S(60), Nano_S(700), Nano_S(5));
 	WaveAngleRange = Range<int>   (0, 90, 10);
 
 	SetWaveParameter( LambdaRange.MIN() );
 	wave_angle  = WaveAngleRange.MIN();
 
 	time = 0;
-	maxStep  = 3000;
+	maxStep  = 6000;
 
 	n_s      = new double[mField->getNcel()];	//ã¸ê‹ó¶
-	mModel    = new FazzySlabModel(mField);
-	//mModel	 = new FazzyMieModel(mField, lambda_s);
+	//mModel    = new FazzySlabModel(mField);
+	mModel	 = new FazzyMieModel(mField, lambda_s);
 	//mModel	 = new FazzyMorphoModel(mField, 150, 55, NONSHELF);
 	//mModel	 = new FazzyNoModel(mField);
 	DataDir		=  "../DataSet/";
@@ -62,13 +62,21 @@ Color Solver::color(double phi){
 	double range = 2.0;
 	Color c;
 	double ab_phi = abs(phi);
-
+/*
 //	double a = ab_phi < 1 ? (ab_phi <  0.34 ? min(1.0, max(0.0, 3*ab_phi)) : (-1.5*ab_phi+2) ) : 0.5;
 	double a = ab_phi < range ? (ab_phi <  range/3.0 ? 3.0/range*ab_phi : (-3.0/4.0/range*ab_phi+1.25) ) : 0.5;
 	c.red  = phi > 0 ? a:0;
 	c.blue = phi < 0 ? a:0;
 	c.green = min(1.0, max(0.0, -3*ab_phi+2));
-
+*/
+	//AnalyzerÇ∆ílÇçáÇÌÇπÇÈ
+	double nv = max(0.0, min(1.0, ab_phi));
+	// Get color
+	if (phi >= 0.75) { c.red = 1.0; c.green = 4.0*(1.0 - nv); c.blue = 0.0; }
+	else if (phi >= 0.5) { c.red = 4.0*(nv - 0.5); c.green = 1.0; c.blue = 0.0; }
+	else if (phi >= 0.25) { c.red = 0.0; c.green = 1.0; c.blue = 4.0*(0.5 - nv); }
+	else { c.red = 0.0; c.green = 4.0*nv; c.blue = 1.0; }
+	
 	return c;
 }
 
@@ -311,7 +319,7 @@ void Solver::draw(Complex *p, Complex *q){
 
 //---------------------------ï`âÊ------------------------------//
 //ç∂â∫Ç™(0,0), âEè„Ç™(Nx,Ny)
-void Solver::draw(complex<double> *p){
+void Solver::draw(Complex *p){
 	double N = max(mField->getNx(),mField->getNy());
 	double ws = 2.0*MAIN_WINDOW_X/WINDOW_W/N;
 	double hs = 2.0*MAIN_WINDOW_H/WINDOW_H/N;

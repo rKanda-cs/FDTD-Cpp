@@ -17,13 +17,12 @@ class FDTD_TM: public Solver{
 protected:
 	Complex *Ez, *Hx, *Hy;
 	Complex *Ezx, *Ezy; //pml—p
-	double *C_EZ, *C_EZLH, *C_HXLY, *C_HYLX, *C_HXLY_NS, *C_HYLX_NS;
+	double *C_EZ, *C_EZLH, *C_HXLY, *C_HYLX;
 	double *C_EZX, *C_EZY, *C_EZXLX, *C_EZYLY;
 	double *C_HX, *C_HY;
 	double *EPS_EZ, *EPS_HX, *EPS_HY;
 	double *B_EZXp, *B_EZXm, *B_EZYp, *B_EZYm; //pml•t‚«NsFDTD—p
 	double *B_HXp, *B_HXm, *B_HYp, *B_HYm;
-
 
 public:
 	FDTD_TM();
@@ -116,14 +115,6 @@ protected:
 		return C_HYLX[pmlIndex(i,j)];
 	};
 
-	double& CHXLYNS(const int &i, const int &j) {
-		return C_HXLY_NS[pmlIndex(i, j)];
-	};
-
-	double& CHYLXNS(const int &i, const int &j) {
-		return C_HYLX_NS[pmlIndex(i, j)];
-	};
-	
 	double& CHX(const int &i, const int &j){
 		return C_HX[pmlIndex(i,j)];
 	};

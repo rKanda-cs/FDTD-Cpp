@@ -10,6 +10,9 @@ protected:
 	double *C_EX, *C_EY, *C_EXLY, *C_EYLX, *C_HZLH;		//LX -> x”÷•ª LY -> y”÷•ª
 	double *C_HZX, *C_HZY, *C_HZXLX, *C_HZYLY;
 	double *EPS_EX, *EPS_EY, *EPS_HZ;
+	double *B_EXp, *B_EXm, *B_EYp, *B_EYm; //pml•t‚«NsFDTD—p
+	double *B_HZXp, *B_HZXm, *B_HZYp, *B_HZYm;
+
 public:
 	FDTD_TE();
 	virtual ~FDTD_TE();
@@ -112,6 +115,38 @@ public:
 
 	inline double& EPSEY(const int &i, const int &j){
 		return EPS_EY[pmlIndex(i,j)];
+	};
+
+	double& BEXP(const int &i, const int &j) {
+		return B_EXp[pmlIndex(i, j)];
+	};
+
+	double& BEXM(const int &i, const int &j) {
+		return B_EXm[pmlIndex(i, j)];
+	};
+
+	double& BEYP(const int &i, const int &j) {
+		return B_EYp[pmlIndex(i, j)];
+	};
+
+	double& BEYM(const int &i, const int &j) {
+		return B_EYm[pmlIndex(i, j)];
+	};
+
+	double& BHZXP(const int &i, const int &j) {
+		return B_HZXp[pmlIndex(i, j)];
+	};
+
+	double& BHZXM(const int &i, const int &j) {
+		return B_HZXm[pmlIndex(i, j)];
+	};
+
+	double& BHZYP(const int &i, const int &j) {
+		return B_HZYp[pmlIndex(i, j)];
+	};
+
+	double& BHZYM(const int &i, const int &j) {
+		return B_HZYm[pmlIndex(i, j)];
 	};
 
 	void SaveData(string prefix = "");

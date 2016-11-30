@@ -35,8 +35,6 @@ FDTD_TM::FDTD_TM()
 	C_HY    = new double[mField->getNcel()];
 	C_HXLY  = new double[mField->getNcel()];	//Chxly(i, j+0.5) → CHXLY(i,j)
 	C_HYLX  = new double[mField->getNcel()];	//Chylx(i+0.5, j) → CHYLX(i,j) を意味する
-	C_HXLY_NS = new double[mField->getNcel()];
-	C_HYLX_NS = new double[mField->getNcel()];
 
 	EPS_EZ = new double[mField->getNcel()];
 	EPS_HX = new double[mField->getNcel()];
@@ -72,9 +70,7 @@ FDTD_TM::~FDTD_TM(){
 	delete[] C_EZYLY;
 	delete[] C_HXLY;
 	delete[] C_HYLX;
-	delete[] C_HXLY_NS;
-	delete[] C_HYLX_NS;
-
+	
 	delete[] C_EZ;
 	delete[] C_EZLH;
 
@@ -199,17 +195,17 @@ void FDTD_TM::NTFFindexform(string label, NTFF::output flag){
 
 	int cx = mField->getNpx()/2;	//座標変換後の原点
 	int cy = mField->getNpy()/2;
-
+	
 	double r0 = 1.0e6;
     complex<double> iu( 0.0, 1.0 );		//単位虚数ベクトル
 	complex<double> Coef = sqrt( iu*k_s/(8*M_PI*r0) ) * exp( iu*k_s*r0 );	//√(jw/8πcr)e^(jkr)
     int offset = 5;		// closed line offset
 
-	int lt,rt, tp, bm;		//閉曲面の場所
-	tp = mField->getNy()-offset;			//上から-5
-	bm = offset;			//下から5
-	rt = mField->getNx() - offset;		//右から-5
-	lt  = offset;			//左から5
+	int lt,rt, tp, bm;		//閉曲面の場所	//計算領域内
+	tp = mField->getNpy() - mField->getNpml() - offset;			//上から-5
+	bm = mField->getNpml() + offset;			//下から5
+	rt = mField->getNpx() - mField->getNpml() - offset;		//右から-5
+	lt = mField->getNpml() + offset;			//左から5
 
 	double sum = 0;			//総和
 	double strength[360];

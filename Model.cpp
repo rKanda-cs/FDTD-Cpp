@@ -59,7 +59,7 @@ FazzyModel(f), ep1(2.0*2.0*EPSILON_0_S), ep2(EPSILON_0_S), width1(250), width2(5
 }
 
 double FazzySlabModel::calcEPS(const double& x, const double& y, enum INTEG f){
-//左100nmから,250nm間隔で50nmのスラブを入れていく  **10nmスラブに変更(L73)
+//左100nmから,250nm間隔で50nmのスラブを入れていく  **左250nmから(L70.71)10nmスラブに変更(L73)
 //多層膜
 	
 	double mx = x - mField->getNpml(); //計算領域内へ写像
@@ -67,8 +67,8 @@ double FazzySlabModel::calcEPS(const double& x, const double& y, enum INTEG f){
 
 	if(mx < 0 || my < 0 || mx >= mField->getNx() || my >= mField->getNy() ) return EPSILON_0_S;
 
-	int k    = (int)(mField->cellToNano(mx) - 100)%250;
-	double l =      (mField->cellToNano(mx) - 100)/250;
+	int k    = (int)(mField->cellToNano(mx) - 250)%250;
+	double l =      (mField->cellToNano(mx) - 250)/250;
 
 	if( k > 0 && k <=10 && l < 5)
 		return ep1;

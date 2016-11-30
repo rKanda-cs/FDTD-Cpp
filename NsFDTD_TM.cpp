@@ -17,19 +17,19 @@ NsFDTD_TM::~NsFDTD_TM(){
 
 
 bool NsFDTD_TM::calc() {
-	//CalcE();	//ìdèÍÇÃåvéZ
+	CalcE();	//ìdèÍÇÃåvéZ
 	CalcE_PML();
 	NsScatteredWave(wave_angle);	//éUóêîgÇÃì¸éÀ
-	//pointLightSource(Ez);
-	//CalcH();	//é•èÍÇÃåvéZ
+	pointLightSource(Ez);
+	CalcH();	//é•èÍÇÃåvéZ
 	CalcH_PML();
 	
 	//absorbing();					//ãzé˚ã´äE
 
 	//ButtonFactory::setButton("EZ", norm(EZ(mField->getNx()/2+10, mField->getNy()/2)));
 	if (time > maxStep) {
-		//MiePrint(Ez, "time"+to_s(maxStep)+"_PML"+to_s(mField->getNpml()));
-		//capture();
+		MiePrint(Ez, "time"+to_s(maxStep)+"_PML"+to_s(mField->getNpml()) + "_NsTM_");
+		capture();
 		return EndTask();
 	}
 
@@ -67,9 +67,9 @@ void NsFDTD_TM::field(){
 			double u_hy = sin(w_s/sqrt(EPSHY(i,j)/EPSILON_0_S)*DT_S/2)/ sin(k_s*DT_S/2);
 			
 			CEZ(i,j)   = 1;							//(1 - tanh(a*h_s)) / (1 + tanh(a*H_S));
-			CEZLH(i,j) = u_ez*sqrt(mu/EPSEZ(i,j));		//u' Å„(É /É√)*(1/(1+tanh(a*H_S)))				
-			CHXLYNS(i,j) = u_hx*sqrt(EPSHX(i,j)/mu);		//u' Å„(É√/É )
-			CHYLXNS(i,j) = u_hy*sqrt(EPSHY(i,j)/mu);		//u' Å„(É√/É )
+			CEZLH(i,j) = u_ez*sqrt(mu/EPSEZ(i,j));		//u' Å„(É /É√)
+			CHXLY(i,j) = u_hx*sqrt(EPSHX(i,j)/mu);		//u' Å„(É√/É )
+			CHYLX(i,j) = u_hy*sqrt(EPSHY(i,j)/mu);		//u' Å„(É√/É )
 		}
 	}
 	cout << "Ns_TM_Field" << endl;
@@ -88,26 +88,19 @@ void NsFDTD_TM::PMLfield() {
 			double sig_y = mField->sigmaY(i, j);
 			double sig_yy = mu / EPSILON_0_S * sig_y;
 
-			double ax = sig_x / (2 * EPSEZ(i, j));
-			double ay = sig_y / (2 * EPSEZ(i, j));
-			double axx = sig_xx / (2 * mu);
-			double ayy = sig_yy / (2 * mu);
+			double ax = sig_x * DT_S / (2 * EPSEZ(i, j));
+			double ay = sig_y * DT_S / (2 * EPSEZ(i, j));
+			double axx = sig_xx * DT_S / (2 * mu);
+			double ayy = sig_yy * DT_S / (2 * mu);
 /*
-			CHX(i, j) = MaxwellCoef(MU_0_S, sig_yy);			// 1- É–/É 			  1/É 
-			CHXLY(i, j) = MaxwellCoef2(MU_0_S, sig_yy);			// --------			--------
-																// 1+ É–/É 			1+ É–/É 
-			CHY(i, j) = MaxwellCoef(MU_0_S, sig_xx);
-			CHYLX(i, j) = MaxwellCoef2(MU_0_S, sig_xx);
-*/
-/*
-			BEZXP(i, j) = 1 + tanh(ax * DT_S);
-			BEZXM(i, j) = 1 - tanh(ax * DT_S);
-			BEZYP(i, j) = 1 + tanh(ay * DT_S);
-			BEZYM(i, j) = 1 - tanh(ay * DT_S);
-			BHXP(i, j) = 1 + tanh(axx * DT_S);
-			BHXM(i, j) = 1 - tanh(axx * DT_S);
-			BHYP(i, j) = 1 + tanh(ayy * DT_S);
-			BHYM(i, j) = 1 - tanh(ayy * DT_S);
+			BEZXP(i, j) = 1 + tanh(ax);
+			BEZXM(i, j) = 1 - tanh(ax);
+			BEZYP(i, j) = 1 + tanh(ay);
+			BEZYM(i, j) = 1 - tanh(ay);
+			BHXP(i, j) = 1 + tanh(axx);
+			BHXM(i, j) = 1 - tanh(axx);
+			BHYP(i, j) = 1 + tanh(ayy);
+			BHYM(i, j) = 1 - tanh(ayy);
 */
 			BEZXP(i, j) = 1 + (tanh(ax) / (1 + tanh(ax)*tanh(axx)));
 			BEZXM(i, j) = 1 - (tanh(ax) / (1 + tanh(ax)*tanh(axx)));
