@@ -114,6 +114,9 @@ double FazzyHairModel::calcEPS(const double& x, const double& y, enum INTEG f) {
 	int c = mField->getNx() / lx + 1;		//計算範囲内のキューティクルの数
 	for (int i = 0; i < c; i++) {
 		if (mx > i * lx && mx < (i + 1) * lx) {
+//			if (my > tan(alphaR) * (mx - lx*i) + cy + rn)	return ep2;
+//			else return ep1;		//Fuzzyなし(Staircaseモデル)
+
 			double dy1 = my - (tan(alphaR) * (mx - lx*i) + cy + rn);
 			double dy2 = my - (tan(alphaR) * ((mx - lx*i) + 1) + cy + rn);
 			double s;
