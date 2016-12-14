@@ -16,9 +16,9 @@
 Solver::Solver()
 	:H_S(1.0), DT_S(1.0)
 {
-	mField = new Field(200, 200, 1, 8); //width, height, É¢h, Npml
-	LambdaRange    = Range<double>(Nano_S(60), Nano_S(700), Nano_S(5));
-	WaveAngleRange = Range<int>   (0, 90, 10);
+	mField = new Field(128000, 128000, 500, 10); //width, height, É¢h, Npml
+	LambdaRange    = Range<double>(Nano_S(440), Nano_S(700), Nano_S(5));
+	WaveAngleRange = Range<int>   (135, 360, 10);
 
 	SetWaveParameter( LambdaRange.MIN() );
 	wave_angle  = WaveAngleRange.MIN();
@@ -28,7 +28,8 @@ Solver::Solver()
 
 	n_s      = new double[mField->getNcel()];	//ã¸ê‹ó¶
 	//mModel    = new FazzySlabModel(mField);
-	mModel	 = new FazzyMieModel(mField, lambda_s);
+	//mModel	 = new FazzyMieModel(mField, lambda_s);
+	mModel    = new FazzyHairModel(mField);
 	//mModel	 = new FazzyMorphoModel(mField, 150, 55, NONSHELF);
 	//mModel	 = new FazzyNoModel(mField);
 	DataDir		=  "../DataSet/";

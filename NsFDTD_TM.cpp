@@ -20,7 +20,7 @@ bool NsFDTD_TM::calc() {
 	CalcE();	//“dê‚ÌŒvZ
 	CalcE_PML();
 	NsScatteredWave(wave_angle);	//U—”g‚Ì“üË
-	pointLightSource(Ez);
+	//pointLightSource(Ez);
 	CalcH();	//¥ê‚ÌŒvZ
 	CalcH_PML();
 	

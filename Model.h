@@ -48,16 +48,31 @@ public:
 	FazzyMieModel(Field* f, double _r);
 	string mkdir(string root);	//ディレクトリ作成
 
-
 	//誘電率計算
 	double calcEPS(const double& x, const double& y, enum INTEG f);
 	bool update(int a){
 		  return true;
 	}
+	void Initialize()
+	{
+	}
+};
 
-	  void Initialize()
-	  {
-	  }
+class FazzyHairModel :public FazzyModel {
+	const double ep1, ep2;
+	const int alpha, length, r;
+	double alphaR, ln, lx, ly, rn;
+public:
+	FazzyHairModel(Field*);
+	string mkdir(string root);
+	double calcEPS(const double&, const double&, enum INTEG = D_XY);
+	bool update(int) {
+		//return true;
+		return false;
+	}
+	void Initialize()
+	{
+	}
 };
 
 enum STRUCTURE{

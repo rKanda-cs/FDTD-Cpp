@@ -86,6 +86,70 @@ string FazzySlabModel::mkdir(string root){
 }
 
 /*---------------------------------------------*/
+/*---------------毛髪--------------------------*/
+/*---------------------------------------------*/
+FazzyHairModel::FazzyHairModel(Field* f) :
+	FazzyModel(f), ep1(1.55*1.55*EPSILON_0_S), ep2(EPSILON_0_S), alpha(5), length(100), r(32)
+	//alpha:キューティクルの角度(deg)  length:キューティクルの長さ(μm)  r:毛の半径(μm)
+{
+	ly = length * sin(alpha * PI / 180);
+	cout << "キューティクルの角度 : " + to_s(alpha) + "deg" << endl;
+	cout << "キューティクル幅 : " + to_s(ly) + "micro" << endl;
+}
+
+double FazzyHairModel::calcEPS(const double& x, const double& y, enum INTEG f) {
+	alphaR = alpha * PI / 180;
+	ln = mField->nanoToCell(length * 1000);
+	lx = ln * cos(alphaR);
+	rn = mField->nanoToCell(r * 1000);
+	
+	double mx = x - mField->getNpml(); //計算領域内へ写像
+	double my = y - mField->getNpml();
+	double cx = mField->getNx() / 2;
+	double cy = mField->getNy() / 2;
+
+	if (mx < 0 || my < 0 || mx >= mField->getNx() || my >= mField->getNy()) return ep2;	//PML層
+	if (my < cy)	my = 2 * cy - my;		//x軸に対して線対称
+
+	int c = mField->getNx() / lx + 1;		//計算範囲内のキューティクルの数
+	for (int i = 0; i < c; i++) {
+		if (mx > i * lx && mx < (i + 1) * lx) {
+			double dy1 = my - (tan(alphaR) * (mx - lx*i) + cy + rn);
+			double dy2 = my - (tan(alphaR) * ((mx - lx*i) + 1) + cy + rn);
+			double s;
+			if (dy1 > 0 && dy2 > 0) return ep2;		//キューティクル直線の外側 (1)
+			if (fabs(dy1) > 1 && fabs(dy2) > 1) return ep1;		//キューティクル直線の内側 (2)
+
+			if (dy1 <= 0 && dy2 <= 0) {
+				if (fabs(dy1) <= 1 && fabs(dy2) <= 1) {
+					s = (fabs(dy1) + fabs(dy2)) * 1.0 / 2.0;
+					return ep1 * s + ep2 * (1 - s);		// (3)
+				}
+				if (fabs(dy1) < 1 && fabs(dy2) > 1) {
+					s = (1 - fabs(dy1)) * ((my - cy - rn) / tan(alphaR) - (mx - lx*i)) / 2;
+					return ep2 * s + ep1 * (1 - s);		// (4)
+				}
+			}
+			if (dy1 > 0 && dy2 < 0) {
+				s = fabs(dy2) * (((mx - lx*i) + 1) - (my - cy - rn) / tan(alphaR)) / 2;
+				return ep1 * s + ep2 * (1 - s);		// (5)
+			}
+		}
+		else
+			continue;
+	}
+	return ep2;
+}
+
+string FazzyHairModel::mkdir(string root) {
+	_mkdir((root + "HairModel").c_str());
+
+	string name = "HairModel/" + mField->getStringCellInfo();
+	_mkdir((root + name).c_str());	//ディレクトリの作成
+	return name + "/";
+}
+
+/*---------------------------------------------*/
 /*--------------モルフォ蝶--------------------*/
 /*---------------------------------------------*/
 FazzyMorphoModel::FazzyMorphoModel(Field* f, double _h0, double _h1, enum STRUCTURE kind):
