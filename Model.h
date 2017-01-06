@@ -21,6 +21,7 @@ public:
 	};
 	virtual string mkdir(string root) = 0;
 	virtual double calcEPS(const double&, const double&, enum INTEG = D_XY) = 0;
+	virtual double calcSIG(const double&, const double&, const double lam, enum INTEG = D_XY) = 0;
 	virtual bool update(int) = 0;
 	virtual void Initialize()=0;
 };
@@ -58,14 +59,50 @@ public:
 	}
 };
 
-class FazzyHairModel :public FazzyModel {
+class FazzyHair_incidenceModel :public FazzyModel {
 	const double ep1, ep2;
-	const int alpha, length, r;
-	double alphaR, ln, lx, ly, rn;
+	const int alpha, cwidth, r;
+	double alphaR, length, ln, lx, ly, rn;
 public:
-	FazzyHairModel(Field*);
+	FazzyHair_incidenceModel(Field*);
 	string mkdir(string root);
 	double calcEPS(const double&, const double&, enum INTEG = D_XY);
+	double calcSIG(const double&, const double&, const double lam, enum INTEG = D_XY);
+	bool update(int) {
+		//return true;
+		return false;
+	}
+	void Initialize()
+	{
+	}
+};
+
+class FazzyHair_normalModel :public FazzyModel {
+	const double ep1, ep2, e;
+	const int r;
+	double rn, ax, by;
+public:
+	FazzyHair_normalModel(Field*);
+	string mkdir(string root);
+	double calcEPS(const double&, const double&, enum INTEG f);
+	bool update(int) {
+		//return true;
+		return false;
+	}
+	void Initialize()
+	{
+	}
+};
+
+class FazzyHair_NONcuticleModel :public FazzyModel {
+	const double ep1, ep2;
+	const int r;
+	double rn;
+public:
+	FazzyHair_NONcuticleModel(Field*);
+	string mkdir(string root);
+	double calcEPS(const double&, const double&, enum INTEG = D_XY);
+	double calcSIG(const double&, const double&, const double lam, enum INTEG = D_XY);
 	bool update(int) {
 		//return true;
 		return false;

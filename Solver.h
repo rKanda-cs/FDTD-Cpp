@@ -7,6 +7,7 @@
 #include <direct.h>
 #include<stack>
 #include<math.h>
+#include<iomanip>
 #include "PhysicalConstant.h"
 #include "Field.h"
 
@@ -79,6 +80,7 @@ protected:
 	double lambda_s, w_s, k_s, T_s;		//シミュレーション用の値
 	int		wave_angle;	//波の角度
 	double	*n_s;		//屈折率, 誘電率
+	double  *Sig_hair;	//メラニン色素の吸収係数
 	double ray_coef;
 	int maxStep;
 	Range<double>	LambdaRange;
@@ -95,8 +97,16 @@ public:
 	void nextTime(){
 		time += DT_S;							//時間の更新
 		ray_coef = 1-exp(-0.0001*time*time);	//波が不連続に入射されるのを防ぐための係数
-		if( ((int)time)%100 == 0)	cout << time << endl;
-	}
+		if (((int)time) % 100 == 0)		cout << time << endl;
+/*
+		if (((int)time) % 100 == 1) {
+			ostringstream oss;
+			oss << std::setfill('0') << std::right << std::setw(5) << time - 1;
+			string name = oss.str();
+			capture(name);		//100stepごとに出力を記録　avi動画作成用
+		}
+*/
+	};
 protected:
 	void draw(Complex *p);
 	void draw(Complex *p, Complex *q);
@@ -142,7 +152,7 @@ protected:
 	}
 
 	bool Terminate(){
-		return false; //今は常に終了
+//		return false; //今は常に終了
 
 		if( !nextLambda()){
 			if(!nextWaveAngle()){
@@ -174,10 +184,11 @@ protected:
 
 
 	void MiePrint(complex<double>*, string);	//Mie散乱解の出力
+	void HairPrint(complex<double>*, string);
 
 	void save_data(complex<double> *data, string name);
 	void open_data(complex<double> *data, string name);
-	void capture();
+	void capture(string name);
 
 	// 中心差分の二回微分 x方向	
 	complex<double> Dx2(complex<double>*p, int i, int j, int t){
@@ -226,6 +237,10 @@ protected:
 	//ゲッター
 	double& N_S(const int& i, const int& j){
 		return n_s[index(i,j)];
+	}
+
+	double& SIG(const int& i, const int& j) {
+		return Sig_hair[index(i, j)];
 	}
 
 	ofstream WriteOpen(string name, DATAFILE::filemode f=DATAFILE::DELETE){

@@ -16,22 +16,26 @@
 Solver::Solver()
 	:H_S(1.0), DT_S(1.0)
 {
-	mField = new Field(128000, 128000, 500, 10); //width, height, ƒ¢h, Npml
-	LambdaRange    = Range<double>(Nano_S(440), Nano_S(700), Nano_S(5));
-	WaveAngleRange = Range<int>   (135, 360, 10);
+	mField = new Field(128000, 128000, 100, 10); //width, height, ƒ¢h, Npml
+	LambdaRange    = Range<double>(Nano_S(380), Nano_S(700), Nano_S(10));
+	WaveAngleRange = Range<int>   (135, 135, 30);
 
 	SetWaveParameter( LambdaRange.MIN() );
 	wave_angle  = WaveAngleRange.MIN();
 
 	time = 0;
-	maxStep  = 6000;
+	maxStep  = 8000;
 
-	n_s      = new double[mField->getNcel()];	//‹üÜ—¦
-	//mModel    = new FazzySlabModel(mField);
-	//mModel	 = new FazzyMieModel(mField, lambda_s);
-	mModel    = new FazzyHairModel(mField);
-	//mModel	 = new FazzyMorphoModel(mField, 150, 55, NONSHELF);
-	//mModel	 = new FazzyNoModel(mField);
+	n_s     = new double[mField->getNcel()];	//‹üÜ—¦
+	Sig_hair = new double[mField->getNcel()];	//‹zŒõ—¦
+
+	//mModel	= new FazzySlabModel(mField);
+	//mModel	= new FazzyMieModel(mField, lambda_s);
+	mModel	= new FazzyHair_incidenceModel(mField);
+	//mModel	= new FazzyHair_normalModel(mField);
+	//mModel	= new FazzyHair_NONcuticleModel(mField);
+	//mModel	= new FazzyMorphoModel(mField, 150, 55, NONSHELF);
+	//mModel	= new FazzyNoModel(mField);
 	DataDir		=  "../DataSet/";
 	WorkingDir  =  "";
 
@@ -40,6 +44,7 @@ Solver::Solver()
 
 Solver::~Solver(){
 	delete[] n_s;
+	delete[] Sig_hair;
 	delete mModel;
 	delete mField;
 	cout << "Solver Destructor" << endl;
@@ -99,6 +104,24 @@ void Solver::MiePrint(complex<double>* p, string name){
 	}
 }
 
+void Solver::HairPrint(complex<double>* p, string name) {
+	printf("Hair print\n");
+	ofstream ofs = WriteOpen(name + "Hair");
+
+	if (ofs) {
+		for (int i = 0; i <= 180; i++) {
+			double _x = 1.2*lambda_s*cos(i*PI / 180) + mField->getNpx() / 2;
+			double _y = 1.2*lambda_s*sin(i*PI / 180) + mField->getNpy() * 3 / 4;
+			double _val = bilinear_interpolation(p, _x, _y);
+			ofs << _val << endl;
+		}
+		printf("output finished\n");
+	}
+	else {
+		printf("No file");
+	}
+}
+
 
 //---------------------------------------//
 //				 “üË”g				 	 //
@@ -125,14 +148,14 @@ void Solver::scatteredWave(complex<double> *p, double *eps){
 		for(int j=mField->getNpml(); j<mField->getNpy(); j++){
 			if( N_S(i,j) == 1.0 ) continue;		//‹üÜ—¦‚ª1‚È‚çU—‚Í‹N‚«‚È‚¢
 			double ikx = k_s*(i*_cos + j*_sin);
-			//p[index(i,j, +1)] += ray_coef*(1/_pow(N_S(i,j), 2)-1)
-			//	                    *(polar(1.0, ikx-w_s*(time+DT_S))+polar(1.0, ikx-w_s*(time-DT_S))-2.0*polar(1.0, ikx-w_s*time)); 
-		
+			p[index(i,j, +1)] += ray_coef*(1/_pow(N_S(i,j), 2)-1)
+				                    *(polar(1.0, ikx-w_s*(time+DT_S))+polar(1.0, ikx-w_s*(time-DT_S))-2.0*polar(1.0, ikx-w_s*time)); 
+/*		
 			p[index(i, j)] += ray_coef*(EPSILON_0_S / eps[index(i, j)] - 1)*(
 				cos(ikx - w_s*(time + 0.5)) + I*sin(ikx - w_s*(time + 0.5))
 				- cos(ikx - w_s*(time - 0.5)) - I*sin(ikx - w_s*(time - 0.5))
 				);
-		}
+*/		}
 	}
 }
 
@@ -351,13 +374,14 @@ void Solver::draw_model(){
 			int x = i-mField->getNpml();
 			int y = j-mField->getNpml();
 			//”}¿‹«ŠE
-			const double n = N_S(i,j);	//‚±‚±‚Å,‹üÜ—¦‚ğ‘‚«Š·‚¦‚Ä‚Í‚¢‚¯‚È‚¢
+			const double n = N_S(i, j);	//‚±‚±‚Å,‹üÜ—¦‚ğ‘‚«Š·‚¦‚Ä‚Í‚¢‚¯‚È‚¢
+			const double s = SIG(i, j);
 
 			if(n == 1.0) continue;	//‹üÜ—¦‚ª1‚È‚ç‚Æ‚Î‚·
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			glDepthMask(GL_FALSE);
-			glColor4d(0.7/n, 0.7/n, 0.7/n, 0.6);
+			glColor4d(0.7/(n+s), 0.7/(n+s), 0.7/(n+s), 0.6);
 			glDepthMask(GL_TRUE);
 		glRectd(x*ws-1, y*hs-1, (x+1.0)*ws-1, (y+1.0)*hs-1);	
 		}
@@ -398,7 +422,7 @@ void Solver::open_data(complex<double> *data, string name){
 
 // @brief Œ»İ‚Ì‰æ–Ê‚Ìó‘Ô‚ğƒLƒƒƒvƒ`ƒƒ‚µ‚Äpng‚É•Û‘¶‚·‚é //
 
-void Solver::capture()
+void Solver::capture(string name)
 {
 	int width = WINDOW_W, height = WINDOW_H;
 
@@ -410,7 +434,7 @@ void Solver::capture()
 	//ã‰º‹t‚É‚·‚é
 	cv::flip(cvmtx, cvmtx, 0);
 	// ‰æ‘œ‚Ì‘‚«o‚µ 
-	cv::imwrite(DataDir + "output.png", cvmtx);
+	cv::imwrite(DataDir + name + ".jpg", cvmtx);
 }
 
 //---------------------------------------------//

@@ -24,7 +24,7 @@ bool StFDTD_TE::calc(){
 
 	if(time > maxStep){						//time•ÏX
 		MiePrint(Ey, "time" + to_s(maxStep) + "_PML" + to_s(mField->getNpml()) + "_StTE_");
-		capture();
+		capture(to_s(time));
 		return false;
 	}
 

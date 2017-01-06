@@ -16,6 +16,7 @@ StFDTD_TM::~StFDTD_TM(){
 void StFDTD_TM::field(){
 	super::field();
 	setWorkingDirPass(MakeDir("St"));
+	setWorkingDirPass(MakeDir(to_s(wave_angle) + "deg_lambda" + to_s((int)Inv_Nano_S(lambda_s))));
 
 	double sig_x, sig_y, sig_xx, sig_yy;//É–x, É–x*, É–y, É–y* Å@Å@<- B-PMLÇÃåWêî
 	for(int i=0; i<mField->getNpx(); i++){
@@ -24,6 +25,14 @@ void StFDTD_TM::field(){
 			sig_xx = MU_0_S/EPSILON_0_S * sig_x;
 			sig_y = mField->sigmaY(i,j);
 			sig_yy = MU_0_S/EPSILON_0_S * sig_y;
+/*
+			if (SIG(i, j) != 0) {
+				sig_x = SIG(i, j);
+				sig_y = SIG(i, j);
+				sig_xx = MU_0_S / EPSILON_0_S * sig_x;
+				sig_yy = MU_0_S / EPSILON_0_S * sig_y;
+			}
+*/
 			//É¢t = 1, É (i,j) = É 0 
  			CEZX(i,j)   = MaxwellCoef(EPSEZ(i,j), sig_x);		// 1- É–/É√			  1/É√
 			CEZXLX(i,j) = MaxwellCoef2(EPSEZ(i,j), sig_x);		// --------			--------
@@ -63,8 +72,10 @@ bool StFDTD_TM::calc(){
 	*/
 	
 	if (time > maxStep) {
-		MiePrint(Ez, "time" + to_s(maxStep) + "_PML" + to_s(mField->getNpml()) + "_StTM_");
-		capture();
+		//MiePrint(Ez, "time" + to_s(maxStep) + "_PML" + to_s(mField->getNpml()) + "_StTM_");
+		//HairPrint(Ez, "time" + to_s(maxStep) + "_Lambda" + to_s((int)Inv_Nano_S(lambda_s)) + "_StTM_");
+		capture(to_s(time));
+		//capture(to_s((int)Inv_Nano_S(lambda_s)));
 		return EndTask();
 	}
 	return true;

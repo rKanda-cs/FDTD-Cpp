@@ -17,19 +17,21 @@ NsFDTD_TM::~NsFDTD_TM(){
 
 
 bool NsFDTD_TM::calc() {
-	CalcE();	//電場の計算
+//	CalcE();	//電場の計算
 	CalcE_PML();
 	NsScatteredWave(wave_angle);	//散乱波の入射
 	//pointLightSource(Ez);
-	CalcH();	//磁場の計算
+//	CalcH();	//磁場の計算
 	CalcH_PML();
 	
 	//absorbing();					//吸収境界
 
 	//ButtonFactory::setButton("EZ", norm(EZ(mField->getNx()/2+10, mField->getNy()/2)));
 	if (time > maxStep) {
-		MiePrint(Ez, "time"+to_s(maxStep)+"_PML"+to_s(mField->getNpml()) + "_NsTM_");
-		capture();
+		//MiePrint(Ez, "time"+to_s(maxStep)+"_PML"+to_s(mField->getNpml()) + "_NsTM_");
+		//HairPrint(Ez, "time" + to_s(maxStep) + "_Lambda" + to_s((int)Inv_Nano_S(lambda_s)) + "_StTM_");
+		//capture(to_s(time));
+		capture(to_s(Inv_Nano_S(lambda_s)));
 		return EndTask();
 	}
 
@@ -88,6 +90,13 @@ void NsFDTD_TM::PMLfield() {
 			double sig_y = mField->sigmaY(i, j);
 			double sig_yy = mu / EPSILON_0_S * sig_y;
 
+			if (SIG(i, j) != 0) {
+				sig_x = SIG(i, j);
+				sig_y = SIG(i, j);
+				sig_xx = mu / EPSILON_0_S * sig_x;
+				sig_yy = mu / EPSILON_0_S * sig_y;
+			}
+			
 			double ax = sig_x * DT_S / (2 * EPSEZ(i, j));
 			double ay = sig_y * DT_S / (2 * EPSEZ(i, j));
 			double axx = sig_xx * DT_S / (2 * mu);
@@ -121,17 +130,17 @@ void NsFDTD_TM::PMLfield() {
 }
 
 void NsFDTD_TM::absorbing(){
-	absorbing_stRL(Hy, 0,	 LEFT);						//左壁
+	absorbing_stRL(Hy, 0, LEFT);						//左壁
 	absorbing_nsRL(Hy, 0, LEFT);
 
 	absorbing_stRL(Hy, mField->getNpx()-2, RIGHT);		//右壁
-	absorbing_nsRL(Hy, mField->getNpx() - 2, RIGHT);
+	absorbing_nsRL(Hy, mField->getNpx()-2, RIGHT);
 
-	absorbing_stTB(Hx, 0,    BOTTOM);					//下壁
+	absorbing_stTB(Hx, 0, BOTTOM);					//下壁
 	absorbing_nsTB(Hx, 0, BOTTOM);
 
 	absorbing_stTB(Hx, mField->getNpy()-2, TOP);			//上壁
-	absorbing_nsTB(Hx, mField->getNpy() - 2, TOP);
+	absorbing_nsTB(Hx, mField->getNpy()-2, TOP);
 }
 
 /* Fieldの係数設定の部分

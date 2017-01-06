@@ -78,7 +78,7 @@ private:
 		#endif
 			for (int i = 1; i < mField->getNpx() - 1; i++) {
 				for (int j = 1; j < mField->getNpy() - 1; j++) {
-					if (i < Npml || i > mField->getNpx() - Npml - 1 || j < Npml || j > mField->getNpy() - Npml - 1)
+//					if (i < Npml || i > mField->getNpx() - Npml - 1 || j < Npml || j > mField->getNpy() - Npml - 1)
 						EZX(i, j, +1) = BEZXP(i, j)*BEZXM(i, j)*EZX(i, j, 0)
 						+ BEZXP(i, j)*CEZLH(i, j)*(HY(i, j, 0) - HY(i - 1, j, 0));
 				}
@@ -89,7 +89,7 @@ private:
 		#endif
 			for (int i = 1; i < mField->getNpx() - 1; i++) {
 				for (int j = 1; j < mField->getNpy() - 1; j++) {
-					if (i < Npml || i > mField->getNpx() - Npml - 1 || j < Npml || j > mField->getNpy() - Npml - 1)
+//					if (i < Npml || i > mField->getNpx() - Npml - 1 || j < Npml || j > mField->getNpy() - Npml - 1)
 						EZY(i, j, +1) = BEZYP(i, j)*BEZYM(i, j)*EZY(i, j, 0)
 						- BEZYP(i, j)*CEZLH(i, j)*(HX(i, j, 0) - HX(i, j - 1, 0));
 				}
@@ -100,7 +100,7 @@ private:
 		#endif
 			for (int i = 1; i < mField->getNpx() - 1; i++)
 				for (int j = 1; j < mField->getNpy() - 1; j++)
-					if (i < Npml || i > mField->getNpx() - Npml - 1 || j < Npml || j > mField->getNpy() - Npml - 1)
+//					if (i < Npml || i > mField->getNpx() - Npml - 1 || j < Npml || j > mField->getNpy() - Npml - 1)
 						EZ(i, j, +1) = EZX(i, j, +1) + EZY(i, j, +1);
 		}
 	}
@@ -116,7 +116,7 @@ private:
 		#endif
 			for (int i = 1; i<mField->getNpx()-1; i++) {
 				for (int j = 0; j<mField->getNpy() - 1; j++) {
-					if (i < Npml || i > mField->getNpx() - Npml - 1 || j < Npml || j > mField->getNpy() - Npml - 1)
+//					if (i < Npml || i > mField->getNpx() - Npml - 1 || j < Npml || j > mField->getNpy() - Npml - 1)
 						HX(i, j, +1) = BHYP(i, j) * BHYM(i, j) * HX(i, j, 0) 
 							- BHYP(i, j)*CHXLY(i, j)*(R_P*(EZ(i, j+1, +1) - EZ(i, j, +1)) + R_M*Dy2_n(Ez, i, j+1, +1));	//Hx‚ÌŒvŽZ Hx(i, j+1/2) -> Hx[i,j]
 				}
@@ -127,7 +127,7 @@ private:
 		#endif
 			for (int i = 0; i<mField->getNpx() - 1; i++) {
 				for (int j = 1; j<mField->getNpy()-1; j++) {
-					if (i < Npml || i > mField->getNpx() - Npml - 1 || j < Npml || j > mField->getNpy() - Npml - 1)
+//					if (i < Npml || i > mField->getNpx() - Npml - 1 || j < Npml || j > mField->getNpy() - Npml - 1)
 						HY(i, j, +1) = BHXP(i, j) * BHXM(i, j) * HY(i, j, 0) 
 							+ BHXP(i, j)*CHYLX(i, j)*(R_P*(EZ(i+1, j, +1) - EZ(i, j, +1)) + R_M*Dx2_n(Ez, i+1, j, +1));	//Hy‚ÌŒvŽZ Hy(i+1/2, j) -> Hy[i,j]
 				}

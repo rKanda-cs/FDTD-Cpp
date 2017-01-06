@@ -123,6 +123,8 @@ void FDTD_TM::field(){
 			EPSHX(i,j) = mModel->calcEPS(i,j+0.5);
 			EPSHY(i,j) = mModel->calcEPS(i+0.5,j);
 			N_S(i,j)   = sqrt( mModel->calcEPS(i+0.5,j+0.5) / EPSILON_0_S );	//屈折率 n = √(ε/ ε0) (ここでは μ = μ0としているので)
+		
+			SIG(i, j) = mModel->calcSIG(i, j, lambda_s);	// Hair/incidenceモデルのみ(メラニン色素考慮有)
 		}
 	}
 }
@@ -157,7 +159,9 @@ void FDTD_TM::IncidentWave(int ang){
 	for(int i=0; i<mField->getNx()-1; i++){
 		for(int j=0; j<mField->getNy()-1; j++){
 			double ikx = k_s*(i*_cos + j*_sin);
-			EZ(i,j, +1) += polar(1.0, ikx - w_s*(time+DT_S));
+			EZX(i, j, +1) += 0.5*polar(1.0, ikx - w_s*(time + DT_S));
+			EZY(i, j, +1) += 0.5*polar(1.0, ikx - w_s*(time + DT_S));
+			EZ(i, j, +1) += polar(1.0, ikx - w_s*(time+DT_S));
 		}
 	}
 }
@@ -276,7 +280,7 @@ void FDTD_TM::NTFFindexform(string label, NTFF::output flag){
 	//NTFFの結果の総和を出力
 	if( (flag & NTFF::TOTAL) == NTFF::TOTAL){
 		ofstream fp= WriteOpen(MakeDir("NTFF") + label + "WaveAngleStrength", DATAFILE::ADD); //falseは追記モード
-		fp << "(" <<(int)Inv_Nano_S(lambda_s) << "," << wave_angle << ")  " << sum << endl;		//波長ごとの総和を出力
+		fp << "(" << to_s((int)Inv_Nano_S(lambda_s)) << "," << wave_angle << ")  " << sum << endl;		//波長ごとの総和を出力
 	}
 
 	//反射率を出力
